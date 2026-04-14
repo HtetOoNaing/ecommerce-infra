@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InfraPro — E-Commerce Infrastructure</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .logo { font-size: 1.5rem; font-weight: 700; color: #fff; text-decoration: none; }
+    .logo span { color: #818cf8; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; transition: color .2s; }
+    .nav-links a:hover { color: #fff; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .65rem 1.5rem; border-radius: .5rem; font-weight: 600;
+      font-size: .95rem; text-decoration: none; transition: all .2s;
+    }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+    .btn-outline { border: 1px solid #475569; color: #e2e8f0; }
+    .btn-outline:hover { border-color: #818cf8; color: #818cf8; }
+    .hero {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; padding: 4rem 2rem;
+    }
+    .hero h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; line-height: 1.1; color: #fff; max-width: 800px; }
+    .hero h1 span { background: linear-gradient(135deg, #818cf8, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { margin-top: 1.5rem; font-size: 1.2rem; color: #94a3b8; max-width: 600px; line-height: 1.6; }
+    .hero-actions { margin-top: 2.5rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .features {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem; max-width: 1000px; margin: 0 auto 4rem; padding: 0 2rem; width: 100%;
+    }
+    .feature {
+      background: rgba(30, 41, 59, .6); border: 1px solid #334155;
+      border-radius: .75rem; padding: 1.5rem;
+    }
+    .feature h3 { font-size: 1.1rem; color: #fff; margin-bottom: .5rem; }
+    .feature p { font-size: .9rem; color: #94a3b8; line-height: 1.5; }
+    footer { text-align: center; padding: 2rem; color: #475569; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">Infra<span>Pro</span></a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="https://app.infra-pro.com/login" class="btn btn-outline">Sign in</a>
+      <a href="https://app.infra-pro.com/register" class="btn btn-primary">Get Started</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Modern <span>E-Commerce</span> Infrastructure</h1>
+    <p>A production-grade platform with authentication, product management, real-time monitoring, and scalable architecture — all in one stack.</p>
+    <div class="hero-actions">
+      <a href="https://app.infra-pro.com/register" class="btn btn-primary">Start Free →</a>
+      <a href="#features" class="btn btn-outline">Learn More</a>
+    </div>
+  </section>
+
+  <section id="features" class="features">
+    <div class="feature">
+      <h3>🔐 Secure Authentication</h3>
+      <p>JWT access & refresh tokens, email verification, password reset, and role-based access control.</p>
+    </div>
+    <div class="feature">
+      <h3>📦 Product Management</h3>
+      <p>Full CRUD operations with pagination, search, SKU tracking, and inventory management.</p>
+    </div>
+    <div class="feature">
+      <h3>📊 Real-time Monitoring</h3>
+      <p>Prometheus metrics, Grafana dashboards, and health checks for complete observability.</p>
+    </div>
+  </section>
+
+  <footer>&copy; 2026 InfraPro. Built with Node.js, Next.js, PostgreSQL, Redis &amp; Docker.</footer>
+</body>
+</html>
