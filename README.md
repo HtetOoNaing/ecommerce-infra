@@ -25,12 +25,12 @@ A production-ready, full-stack e-commerce infrastructure platform demonstrating 
 │   (Next.js)     │    │     (Express)      │  │    (BullMQ)       │
 └─────────────────┘    └─────────┬──────────┘  └───────────────────┘
                                  │
-                    ┌────────────┼────────────┐
-                    │            │            │
-           ┌────────▼──┐  ┌─────▼────┐  ┌────▼───┐
-           │PostgreSQL │  │  Redis   │  │Grafana │
-           │  (Data)   │  │(Queue)   │  │(Metrics)│
-           └───────────┘  └──────────┘  └────────┘
+                 ┌───────────────┼─────────────┐
+                 │               │             │
+           ┌─────▼─────┐    ┌────▼────┐   ┌────▼────┐
+           │PostgreSQL │    │  Redis  │   │ Grafana │
+           │  (Data)   │    │ (Queue) │   │(Metrics)│
+           └───────────┘    └─────────┘   └─────────┘
 ```
 
 ## Tech Stack
