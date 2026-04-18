@@ -5,6 +5,7 @@ import {
   UserResponseDto,
   UserEntity,
 } from "./user.types";
+import { AppError } from "@/utils/appError";
 
 export class UserService {
   private repo = new UserRepository();
@@ -23,7 +24,7 @@ export class UserService {
     const existing = await this.repo.findByEmail(data.email);
 
     if (existing) {
-      throw new Error("User already exists");
+      throw AppError.conflict("User already exists");
     }
 
     const user = await this.repo.create(data);
