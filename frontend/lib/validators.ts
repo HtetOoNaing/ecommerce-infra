@@ -8,8 +8,9 @@ import { z } from "zod";
 export const AuthUserSchema = z.object({
   id: z.number(),
   email: z.string().email(),
-  name: z.string(),
+  name: z.string().nullable().optional(),
   role: z.enum(["admin", "user"]),
+  isVerified: z.boolean(),
 });
 
 export const LoginResponseSchema = z.object({
@@ -28,9 +29,9 @@ export const ForgotPasswordResponseSchema = z.object({
 export const UserSchema = z.object({
   id: z.number(),
   email: z.string().email(),
-  name: z.string(),
+  name: z.string().nullable().optional(),
   role: z.enum(["admin", "user"]),
-  isActive: z.boolean().optional(),
+  isVerified: z.boolean(),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),
 });
