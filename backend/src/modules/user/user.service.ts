@@ -4,6 +4,8 @@ import {
   CreateUserDto,
   UserResponseDto,
   UserEntity,
+  PaginationQuery,
+  PaginatedResponse,
 } from "./user.types";
 import { AppError } from "@/utils/appError";
 
@@ -32,9 +34,18 @@ export class UserService {
     return this.toResponse(user);
   }
 
-  async getUsers(): Promise<UserResponseDto[]> {
-    const users = await this.repo.findAll();
-    return users.map((u) => this.toResponse(u));
+  async getUsers(query: PaginationQuery): Promise<PaginatedResponse<UserResponseDto>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const result = await this.repo.findAll(page, limit);
+
+    return {
+      data: result.data.map((u) => this.toResponse(u)),
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+    };
   }
 
   async findByEmail(email: string): Promise<User | null> {

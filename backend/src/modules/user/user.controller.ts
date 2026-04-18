@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { UserService } from "./user.service";
+import { PaginationQuery } from "./user.types";
 
 const service = new UserService();
 
@@ -9,8 +10,8 @@ export class UserController {
     res.status(201).json(user);
   }
 
-  async getAll(_req: Request, res: Response) {
-    const users = await service.getUsers();
+  async getAll(req: Request, res: Response) {
+    const users = await service.getUsers(req.query as PaginationQuery);
     res.json(users);
   }
 }

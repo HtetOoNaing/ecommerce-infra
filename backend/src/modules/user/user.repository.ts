@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { User } from "./user.model";
-import { CreateUserDto, UserEntity } from "./user.types";
+import { CreateUserDto, UserEntity, PaginatedResponse } from "./user.types";
 
 export class UserRepository {
   async create(data: CreateUserDto): Promise<UserEntity> {
@@ -8,9 +8,21 @@ export class UserRepository {
     return user.toJSON() as UserEntity;
   }
 
-  async findAll(): Promise<UserEntity[]> {
-    const users = await User.findAll();
-    return users.map((u) => u.toJSON() as UserEntity);
+  async findAll(page: number, limit: number): Promise<PaginatedResponse<UserEntity>> {
+    const offset = (page - 1) * limit;
+    const { count, rows } = await User.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      limit,
+      offset,
+    });
+
+    return {
+      data: rows.map((u) => u.toJSON() as UserEntity),
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit),
+    };
   }
 
   async findByEmail(email: string): Promise<User | null> {
