@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { getUsers } from "@/lib/api";
-import type { User } from "@/lib/types";
+import type { User, PaginatedResponse } from "@/lib/types";
 import Badge from "@/components/ui/badge";
 import Pagination from "@/components/ui/pagination";
 import { TableSkeleton } from "@/components/ui/skeleton";
@@ -16,20 +16,28 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  const load = async (pageNum = 1) => {
+    setLoading(true);
+    try {
+      const response: PaginatedResponse<User> = await getUsers(pageNum, PAGE_SIZE);
+      setUsers(response.data);
+      setTotalPages(response.totalPages);
+      setTotal(response.total);
+    } catch {
+      // handled by API
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function load() {
-      try {
-        setUsers(await getUsers());
-      } catch {
-        // handled by API
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    load(1);
   }, []);
 
+  // Client-side search (filter current page only for UX)
   const filtered = useMemo(
     () =>
       users.filter(
@@ -40,8 +48,10 @@ export default function UsersPage() {
     [users, search]
   );
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    load(newPage);
+  };
 
   if (loading) {
     return (
@@ -87,7 +97,7 @@ export default function UsersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginated.map((user) => (
+                  {filtered.map((user) => (
                     <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-3 font-medium text-gray-900">{user.name ?? "—"}</td>
                       <td className="px-4 py-3 text-gray-500">{user.email}</td>
@@ -108,7 +118,12 @@ export default function UsersPage() {
             </div>
           </div>
 
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Showing {filtered.length} of {total} users
+            </p>
+            <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+          </div>
         </>
       )}
     </div>
