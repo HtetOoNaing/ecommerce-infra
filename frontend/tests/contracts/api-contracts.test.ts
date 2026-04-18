@@ -169,7 +169,7 @@ describe("Safe Validation", () => {
       email: "test@example.com",
       name: "Test User",
       role: "user" as const,
-      isActive: true,
+      isVerified: true,
     };
 
     const result = safeValidateResponse(UserSchema, validUser);
