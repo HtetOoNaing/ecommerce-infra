@@ -5,6 +5,8 @@ import {
   UpdateProductDto,
   ProductResponseDto,
   ProductEntity,
+  PaginationQuery,
+  PaginatedResponse,
 } from "./product.types";
 
 export class ProductService {
@@ -35,9 +37,18 @@ export class ProductService {
     return this.toResponse(product);
   }
 
-  async getAll(): Promise<ProductResponseDto[]> {
-    const products = await this.repo.findAll();
-    return products.map((p) => this.toResponse(p));
+  async getAll(query: PaginationQuery): Promise<PaginatedResponse<ProductResponseDto>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const result = await this.repo.findAll(page, limit);
+
+    return {
+      data: result.data.map((p) => this.toResponse(p)),
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+    };
   }
 
   async getById(id: number): Promise<ProductResponseDto> {

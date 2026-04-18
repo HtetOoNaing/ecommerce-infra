@@ -1,5 +1,5 @@
 import { Product } from "./product.model";
-import { CreateProductDto, UpdateProductDto, ProductEntity } from "./product.types";
+import { CreateProductDto, UpdateProductDto, ProductEntity, PaginatedResponse } from "./product.types";
 
 export class ProductRepository {
   async create(data: CreateProductDto): Promise<ProductEntity> {
@@ -7,9 +7,21 @@ export class ProductRepository {
     return product.toJSON() as ProductEntity;
   }
 
-  async findAll(): Promise<ProductEntity[]> {
-    const products = await Product.findAll({ order: [["createdAt", "DESC"]] });
-    return products.map((p) => p.toJSON() as ProductEntity);
+  async findAll(page: number, limit: number): Promise<PaginatedResponse<ProductEntity>> {
+    const offset = (page - 1) * limit;
+    const { count, rows } = await Product.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      limit,
+      offset,
+    });
+
+    return {
+      data: rows.map((p) => p.toJSON() as ProductEntity),
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit),
+    };
   }
 
   async findById(id: number): Promise<ProductEntity | null> {

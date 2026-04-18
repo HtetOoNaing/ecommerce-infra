@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { ProductService } from "./product.service";
 import { AuthRequest } from "@/middlewares/auth.middleware";
+import { PaginationQuery } from "./product.types";
 
 const service = new ProductService();
 
@@ -10,8 +11,8 @@ export class ProductController {
     res.status(201).json(product);
   }
 
-  async getAll(_req: AuthRequest, res: Response) {
-    const products = await service.getAll();
+  async getAll(req: AuthRequest, res: Response) {
+    const products = await service.getAll(req.query as PaginationQuery);
     res.json(products);
   }
 

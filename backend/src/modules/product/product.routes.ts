@@ -2,14 +2,14 @@ import { Router } from "express";
 import { ProductController } from "./product.controller";
 import { authenticate } from "@/middlewares/auth.middleware";
 import { authorize } from "@/middlewares/role.middleware";
-import { validate } from "@/middlewares/validate.middleware";
-import { createProductSchema, updateProductSchema } from "./product.validation";
+import { validate, validateQuery } from "@/middlewares/validate.middleware";
+import { createProductSchema, updateProductSchema, paginationQuerySchema } from "./product.validation";
 
 const router = Router();
 const controller = new ProductController();
 
 // Public — anyone can browse products
-router.get("/", controller.getAll.bind(controller));
+router.get("/", validateQuery(paginationQuerySchema), controller.getAll.bind(controller));
 router.get("/:id", controller.getById.bind(controller));
 
 // Protected — only authenticated admins can manage products
