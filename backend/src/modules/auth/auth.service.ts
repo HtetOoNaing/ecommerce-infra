@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import { UserService } from "@/modules/user/user.service";
 import { RegisterDTO, LoginDTO } from "./auth.types";
 import {
@@ -9,9 +8,10 @@ import {
 import { deleteRefreshToken, getRefreshToken, setRefreshToken } from "./auth.redis";
 import { v4 as uuidv4 } from "uuid";
 import { generateToken, hashToken } from "@/utils/token";
-import { hashPassword } from "@/utils/hash";
+import { hashPassword, comparePassword } from "@/utils/hash";
 import { addEmailJob } from "@/jobs/producers/email.producer";
 import { logger } from "@/config/logger";
+import { AppError } from "@/utils/appError";
 
 const userService = new UserService();
 
@@ -20,14 +20,14 @@ export class AuthService {
     logger.info('Registering user', { requestId, email: data.email });
     const existing = await userService.findByEmail(data.email);
     if (existing) {
-      throw new Error("User already exists");
+      throw AppError.conflict("User already exists");
     }
 
     const sessionId = uuidv4();
     const verificationToken = generateToken();
     const hashedToken = hashToken(verificationToken);
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await hashPassword(data.password);
 
     const user = await userService.createUser({
       email: data.email,
@@ -66,20 +66,17 @@ export class AuthService {
     logger.info('User login attempt', { requestId, email: data.email });
     const user = await userService.findByEmail(data.email);
 
-    if (!user) throw new Error("Invalid credentials");
+    if (!user) throw AppError.unauthorized("Invalid credentials");
 
     if (!user.isVerified) {
-      throw new Error("Please verify your email first");
+      throw AppError.forbidden("Please verify your email first");
     }
 
     const sessionId = uuidv4();
 
-    const isValid = await bcrypt.compare(
-      data.password,
-      user.password
-    );
+    const isValid = await comparePassword(data.password, user.password);
 
-    if (!isValid) throw new Error("Invalid credentials");
+    if (!isValid) throw AppError.unauthorized("Invalid credentials");
 
     const payload = {
       id: user.id,
@@ -114,7 +111,7 @@ export class AuthService {
     // Token mismatch → possible attack
     if (!stored || stored !== refreshToken) {
       await deleteRefreshToken(payload.id, payload.sessionId);
-      throw new Error("Invalid refresh token");
+      throw AppError.unauthorized("Invalid refresh token");
     }
 
     // ROTATION START
@@ -147,7 +144,7 @@ export class AuthService {
 
     const user = await userService.findByVerificationToken(hashed);
 
-    if (!user) throw new Error("Invalid token");
+    if (!user) throw AppError.badRequest("Invalid verification token");
 
     user.isVerified = true;
     user.verificationToken = null;
@@ -188,7 +185,7 @@ export class AuthService {
       new Date()
     );
 
-    if (!user) throw new Error("Invalid or expired token");
+    if (!user) throw AppError.badRequest("Invalid or expired reset token");
 
     user.password = await hashPassword(newPassword);
 
