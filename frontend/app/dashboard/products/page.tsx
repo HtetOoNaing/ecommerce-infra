@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { getProducts, deleteProduct, ApiError } from "@/lib/api";
-import type { Product } from "@/lib/types";
+import type { Product, PaginatedResponse } from "@/lib/types";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import Pagination from "@/components/ui/pagination";
@@ -20,16 +20,21 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState(false);
   const toast = useToast();
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (pageNum = 1) => {
+    setLoading(true);
     try {
-      const data = await getProducts();
-      setProducts(data);
+      const response: PaginatedResponse<Product> = await getProducts(pageNum, PAGE_SIZE);
+      setProducts(response.data);
+      setTotalPages(response.totalPages);
+      setTotal(response.total);
     } catch {
       // handled by API layer
     } finally {
@@ -37,8 +42,9 @@ export default function ProductsPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(1); }, [load]);
 
+  // Client-side search (filter current page only for UX)
   const filtered = useMemo(
     () =>
       products.filter(
@@ -49,8 +55,10 @@ export default function ProductsPage() {
     [products, search]
   );
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    load(newPage);
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -127,7 +135,7 @@ export default function ProductsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginated.map((product) => (
+                  {filtered.map((product) => (
                     <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-3 font-medium text-gray-900">{product.name}</td>
                       <td className="px-4 py-3 text-gray-500 font-mono text-xs">{product.sku}</td>
@@ -163,7 +171,12 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Showing {filtered.length} of {total} products
+            </p>
+            <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+          </div>
         </>
       )}
 
@@ -172,7 +185,7 @@ export default function ProductsPage() {
         <ProductModal
           product={editProduct}
           onClose={() => { setShowCreate(false); setEditProduct(null); }}
-          onSaved={() => { setShowCreate(false); setEditProduct(null); load(); }}
+          onSaved={() => { setShowCreate(false); setEditProduct(null); load(page); }}
         />
       )}
 
