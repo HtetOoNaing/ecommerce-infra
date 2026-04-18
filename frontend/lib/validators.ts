@@ -36,7 +36,18 @@ export const UserSchema = z.object({
   updatedAt: z.string().datetime().optional(),
 });
 
-export const UsersListSchema = z.array(UserSchema);
+// ─── Pagination Schema ───────────────────────────────
+export function createPaginatedResponseSchema<T>(itemSchema: z.ZodSchema<T>) {
+  return z.object({
+    data: z.array(itemSchema),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+  });
+}
+
+export const UsersListSchema = createPaginatedResponseSchema(UserSchema);
 
 // ─── Product Schemas ──────────────────────────────────
 export const ProductSchema = z.object({
@@ -52,7 +63,7 @@ export const ProductSchema = z.object({
   updatedAt: z.string().datetime().optional(),
 });
 
-export const ProductsListSchema = z.array(ProductSchema);
+export const ProductsListSchema = createPaginatedResponseSchema(ProductSchema);
 
 export const CreateProductSchema = z.object({
   name: z.string().min(1).max(255),
