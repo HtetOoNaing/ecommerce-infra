@@ -660,7 +660,6 @@ describe("POST /api/v1/auth/login", () => {
 ## Known TODOs / Planned Work
 
 - [ ] Sequelize CLI migrations for production schema management
-- [ ] Pagination on `GET /products` and `GET /users`
 - [ ] Product categories / tags
 - [ ] Order management module
 - [ ] Rate limiting per-user (currently global + auth-specific)
