@@ -659,7 +659,6 @@ describe("POST /api/v1/auth/login", () => {
 
 ## Known TODOs / Planned Work
 
-- [ ] Replace `new Error()` calls in `auth.service.ts` and `user.service.ts` with `AppError` (inconsistency)
 - [ ] Sequelize CLI migrations for production schema management
 - [ ] Pagination on `GET /products` and `GET /users`
 - [ ] Product categories / tags
