@@ -268,10 +268,6 @@ DashboardStats    // { totalUsers, totalProducts, activeProducts, verifiedUsers 
 PaginatedResponse<T> // { data, total, page, limit, totalPages } — ready for when pagination is added
 ```
 
-## Known Schema Mismatch (TODO)
-
-`lib/validators.ts` `UserSchema` uses `isActive: z.boolean().optional()` but the actual `User` type has `isVerified: boolean`. This was left optional as a workaround for contract tests. It should be updated to `isVerified: z.boolean()` and `AuthUserSchema` should also include `isVerified`.
-
 ## Test Commands
 
 | Command | Description |
