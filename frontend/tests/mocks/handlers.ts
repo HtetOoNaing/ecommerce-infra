@@ -83,13 +83,33 @@ export const handlers = [
   }),
 
   // Users
-  http.get(`${API}/users`, () => {
-    return HttpResponse.json(mockUsers);
+  http.get(`${API}/users`, ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+
+    return HttpResponse.json({
+      data: mockUsers,
+      total: mockUsers.length,
+      page,
+      limit,
+      totalPages: Math.ceil(mockUsers.length / limit),
+    });
   }),
 
   // Products
-  http.get(`${API}/products`, () => {
-    return HttpResponse.json(mockProducts);
+  http.get(`${API}/products`, ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+
+    return HttpResponse.json({
+      data: mockProducts,
+      total: mockProducts.length,
+      page,
+      limit,
+      totalPages: Math.ceil(mockProducts.length / limit),
+    });
   }),
 
   http.get(`${API}/products/:id`, ({ params }) => {

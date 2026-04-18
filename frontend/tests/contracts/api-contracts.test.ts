@@ -67,15 +67,18 @@ describe("Auth API Contracts", () => {
 describe("User API Contracts", () => {
   it("user list response matches schema", async () => {
     await login("admin@test.com", "Test1234!");
-    const users = await getUsers();
+    const response = await getUsers();
 
-    // Validate array structure
-    const validated = validateResponse(UsersListSchema, users);
+    // Validate paginated structure
+    const validated = validateResponse(UsersListSchema, response);
 
-    expect(validated.length).toBeGreaterThan(0);
+    expect(validated.data.length).toBeGreaterThan(0);
+    expect(validated.total).toBeGreaterThan(0);
+    expect(validated.page).toBe(1);
+    expect(validated.totalPages).toBeGreaterThanOrEqual(1);
 
     // Each user should match UserSchema
-    validated.forEach((user) => {
+    validated.data.forEach((user) => {
       expect(user.id).toBeDefined();
       expect(user.email).toContain("@");
       expect(["admin", "user"]).toContain(user.role);
@@ -84,10 +87,10 @@ describe("User API Contracts", () => {
 
   it("individual user matches schema", async () => {
     await login("admin@test.com", "Test1234!");
-    const users = await getUsers();
+    const response = await getUsers();
 
-    if (users.length > 0) {
-      const user = users[0];
+    if (response.data.length > 0) {
+      const user = response.data[0];
       const validated = validateResponse(UserSchema, user);
 
       expect(validated.id).toBe(user.id);
@@ -98,18 +101,21 @@ describe("User API Contracts", () => {
 
 describe("Product API Contracts", () => {
   it("product list response matches schema", async () => {
-    const products = await getProducts();
+    const response = await getProducts();
 
-    const validated = validateResponse(ProductsListSchema, products);
+    const validated = validateResponse(ProductsListSchema, response);
 
-    expect(Array.isArray(validated)).toBe(true);
+    expect(Array.isArray(validated.data)).toBe(true);
+    expect(validated.total).toBeGreaterThanOrEqual(0);
+    expect(validated.page).toBe(1);
+    expect(validated.totalPages).toBeGreaterThanOrEqual(1);
   });
 
   it("individual product matches schema", async () => {
-    const products = await getProducts();
+    const response = await getProducts();
 
-    if (products.length > 0) {
-      const productId = products[0].id;
+    if (response.data.length > 0) {
+      const productId = response.data[0].id;
       const product = await getProduct(productId);
 
       const validated = validateResponse(ProductSchema, product);
@@ -146,12 +152,12 @@ describe("Product API Contracts", () => {
     await login("admin@test.com", "Test1234!");
 
     // Get existing product
-    const products = await getProducts();
-    if (products.length === 0) {
+    const response = await getProducts();
+    if (response.data.length === 0) {
       return;
     }
 
-    const productId = products[0].id;
+    const productId = response.data[0].id;
     const updateData = { name: "Updated Contract Test" };
 
     const product = await updateProduct(productId, updateData);
