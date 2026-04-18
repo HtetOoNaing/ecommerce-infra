@@ -1,52 +1,32 @@
-import { Request, Response, NextFunction } from "express";
+import { Response } from "express";
 import { ProductService } from "./product.service";
+import { AuthRequest } from "@/middlewares/auth.middleware";
 
 const service = new ProductService();
 
 export class ProductController {
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = (req as any).user?.id;
-      const product = await service.create({ ...req.body, createdBy: userId });
-      res.status(201).json(product);
-    } catch (err) {
-      next(err);
-    }
+  async create(req: AuthRequest, res: Response) {
+    const product = await service.create({ ...req.body, createdBy: req.user!.id });
+    res.status(201).json(product);
   }
 
-  async getAll(_req: Request, res: Response, next: NextFunction) {
-    try {
-      const products = await service.getAll();
-      res.json(products);
-    } catch (err) {
-      next(err);
-    }
+  async getAll(_req: AuthRequest, res: Response) {
+    const products = await service.getAll();
+    res.json(products);
   }
 
-  async getById(req: Request, res: Response, next: NextFunction) {
-    try {
-      const product = await service.getById(Number(req.params.id));
-      res.json(product);
-    } catch (err) {
-      next(err);
-    }
+  async getById(req: AuthRequest, res: Response) {
+    const product = await service.getById(Number(req.params.id));
+    res.json(product);
   }
 
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      const product = await service.update(Number(req.params.id), req.body);
-      res.json(product);
-    } catch (err) {
-      next(err);
-    }
+  async update(req: AuthRequest, res: Response) {
+    const product = await service.update(Number(req.params.id), req.body);
+    res.json(product);
   }
 
-  async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      await service.delete(Number(req.params.id));
-      res.status(204).send();
-    } catch (err) {
-      next(err);
-    }
+  async delete(req: AuthRequest, res: Response) {
+    await service.delete(Number(req.params.id));
+    res.status(204).send();
   }
 }
