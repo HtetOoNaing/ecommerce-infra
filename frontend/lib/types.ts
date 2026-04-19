@@ -35,7 +35,37 @@ export interface User {
   isVerified: boolean;
 }
 
+// ─── Category ──────────────────────────────────────────
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCategoryDto {
+  name: string;
+  slug: string;
+  description?: string;
+}
+
+export interface UpdateCategoryDto {
+  name?: string;
+  slug?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
 // ─── Product ─────────────────────────────────────────
+export interface CategoryInfo {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -45,6 +75,8 @@ export interface Product {
   sku: string;
   isActive: boolean;
   createdBy: number;
+  categoryId?: number | null;
+  category?: CategoryInfo | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,6 +87,7 @@ export interface CreateProductDto {
   price: number;
   stock: number;
   sku: string;
+  categoryId?: number;
 }
 
 export interface UpdateProductDto {
@@ -64,6 +97,7 @@ export interface UpdateProductDto {
   stock?: number;
   sku?: string;
   isActive?: boolean;
+  categoryId?: number | null;
 }
 
 // ─── Pagination ──────────────────────────────────────

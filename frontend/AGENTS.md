@@ -45,11 +45,12 @@ All API calls use the modular structure in `lib/api/`:
 
 ```
 lib/api/
-├── client.ts    # request(), ApiError, token get/set/clear, loginWithTokens, registerWithTokens
-├── auth.ts      # login, register, logout, forgotPassword, resetPassword
-├── users.ts     # getUsers
-├── products.ts  # getProducts, getProduct, createProduct, updateProduct, deleteProduct
-└── index.ts     # Barrel exports (always import from here)
+├── client.ts     # request(), ApiError, token get/set/clear, loginWithTokens, registerWithTokens
+├── auth.ts       # login, register, logout, forgotPassword, resetPassword
+├── users.ts      # getUsers(page?, limit?) → PaginatedResponse<User>
+├── products.ts   # getProducts(page?, limit?), getProduct, createProduct, updateProduct, deleteProduct
+├── categories.ts # getCategories, getCategory, getCategoryBySlug, createCategory, updateCategory, deleteCategory
+└── index.ts      # Barrel exports (always import from here)
 ```
 
 **Always import from the barrel:**
@@ -153,12 +154,16 @@ toast.toast("Custom", "success"); // generic
 ```typescript
 const [products, setProducts] = useState<Product[]>([]);
 const [loading, setLoading] = useState(true);
+const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
 const toast = useToast();
 
-const load = useCallback(async () => {
+const load = useCallback(async (pageNum = 1) => {
+  setLoading(true);
   try {
-    const data = await getProducts();
-    setProducts(data);
+    const response = await getProducts(pageNum, 10);
+    setProducts(response.data);
+    setTotalPages(response.totalPages);
   } catch {
     // ApiError message already shown; silent fail is acceptable here
   } finally {
@@ -166,7 +171,7 @@ const load = useCallback(async () => {
   }
 }, []);
 
-useEffect(() => { load(); }, [load]);
+useEffect(() => { load(1); }, [load]);
 ```
 
 ### Form Submission
@@ -261,11 +266,28 @@ Key interfaces:
 AuthUser      // { id, email, name?, role, isVerified }
 LoginResponse // { user: AuthUser, accessToken, refreshToken }
 User          // same shape as AuthUser
-Product       // { id, name, description?, price, stock, sku, isActive, createdBy, createdAt, updatedAt }
-CreateProductDto  // { name, description?, price, stock, sku }
-UpdateProductDto  // all fields optional
+Category      // { id, name, slug, description?, isActive, createdAt, updatedAt }
+CreateCategoryDto // { name, slug, description? }
+UpdateCategoryDto // all fields optional
+Product       // { id, name, description?, price, stock, sku, isActive, createdBy, categoryId?, category?, createdAt, updatedAt }
+CreateProductDto  // { name, description?, price, stock, sku, categoryId? }
+UpdateProductDto  // all fields optional, categoryId can be null to remove
 DashboardStats    // { totalUsers, totalProducts, activeProducts, verifiedUsers }
-PaginatedResponse<T> // { data, total, page, limit, totalPages } — ready for when pagination is added
+
+PaginatedResponse<T> // { data: T[], total, page, limit, totalPages }
+```
+
+### Paginated API Usage
+
+List endpoints return `PaginatedResponse<T>`:
+
+```typescript
+const response = await getProducts(1, 10); // page 1, limit 10
+// response.data — array of products for current page
+// response.total — total count across all pages
+// response.page — current page number
+// response.limit — items per page
+// response.totalPages — total number of pages
 ```
 
 ## Test Commands

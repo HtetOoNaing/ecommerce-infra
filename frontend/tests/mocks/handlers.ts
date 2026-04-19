@@ -16,6 +16,27 @@ export const mockUsers = [
   { id: 2, email: "user@test.com", name: "User", role: "user" as const, isVerified: false },
 ];
 
+export const mockCategories = [
+  {
+    id: 1,
+    name: "Electronics",
+    slug: "electronics",
+    description: "Electronic devices and accessories",
+    isActive: true,
+    createdAt: "2026-04-11T21:05:44.719Z",
+    updatedAt: "2026-04-11T21:05:44.719Z",
+  },
+  {
+    id: 2,
+    name: "Accessories",
+    slug: "accessories",
+    description: "Computer and device accessories",
+    isActive: true,
+    createdAt: "2026-04-12T10:00:00.000Z",
+    updatedAt: "2026-04-12T10:00:00.000Z",
+  },
+];
+
 export const mockProducts = [
   {
     id: 1,
@@ -26,6 +47,8 @@ export const mockProducts = [
     sku: "MBP-16-2026",
     isActive: true,
     createdBy: 1,
+    categoryId: 1,
+    category: { id: 1, name: "Electronics", slug: "electronics" },
     createdAt: "2026-04-11T21:05:44.719Z",
     updatedAt: "2026-04-11T21:05:44.719Z",
   },
@@ -38,6 +61,8 @@ export const mockProducts = [
     sku: "MK-2026",
     isActive: false,
     createdBy: 1,
+    categoryId: 2,
+    category: { id: 2, name: "Accessories", slug: "accessories" },
     createdAt: "2026-04-12T10:00:00.000Z",
     updatedAt: "2026-04-12T10:00:00.000Z",
   },
@@ -136,6 +161,60 @@ export const handlers = [
   http.delete(`${API}/products/:id`, ({ params }) => {
     const product = mockProducts.find((p) => p.id === Number(params.id));
     if (!product) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // Categories
+  http.get(`${API}/categories`, ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+
+    return HttpResponse.json({
+      data: mockCategories,
+      total: mockCategories.length,
+      page,
+      limit,
+      totalPages: Math.ceil(mockCategories.length / limit),
+    });
+  }),
+
+  http.get(`${API}/categories/:id`, ({ params }) => {
+    const category = mockCategories.find((c) => c.id === Number(params.id));
+    if (!category) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+    return HttpResponse.json(category);
+  }),
+
+  http.get(`${API}/categories/slug/:slug`, ({ params }) => {
+    const category = mockCategories.find((c) => c.slug === params.slug);
+    if (!category) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+    return HttpResponse.json(category);
+  }),
+
+  http.post(`${API}/categories`, async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json(
+      {
+        id: 3,
+        ...body,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { status: 201 }
+    );
+  }),
+
+  http.put(`${API}/categories/:id`, async ({ request, params }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    const category = mockCategories.find((c) => c.id === Number(params.id));
+    if (!category) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+    return HttpResponse.json({ ...category, ...body, updatedAt: new Date().toISOString() });
+  }),
+
+  http.delete(`${API}/categories/:id`, ({ params }) => {
+    const category = mockCategories.find((c) => c.id === Number(params.id));
+    if (!category) return HttpResponse.json({ message: "Not found" }, { status: 404 });
     return new HttpResponse(null, { status: 204 });
   }),
 ];

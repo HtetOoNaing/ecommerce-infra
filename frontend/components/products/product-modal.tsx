@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { X } from "lucide-react";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
-import { createProduct, updateProduct, ApiError } from "@/lib/api";
+import { createProduct, updateProduct, getCategories, ApiError } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
-import type { Product } from "@/lib/types";
+import type { Product, Category } from "@/lib/types";
 
 interface Props {
   product: Product | null;
@@ -21,6 +21,9 @@ export default function ProductModal({ product, onClose, onSaved }: Props) {
   const [price, setPrice] = useState(product?.price?.toString() ?? "");
   const [stock, setStock] = useState(product?.stock?.toString() ?? "");
   const [sku, setSku] = useState(product?.sku ?? "");
+  const [categoryId, setCategoryId] = useState<number | "">(product?.categoryId ?? "");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -33,6 +36,22 @@ export default function ProductModal({ product, onClose, onSaved }: Props) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
+  const loadCategories = useCallback(async () => {
+    setCategoriesLoading(true);
+    try {
+      const response = await getCategories(1, 100);
+      setCategories(response.data);
+    } catch {
+      // Silent fail - category selector will show empty
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -43,6 +62,7 @@ export default function ProductModal({ product, onClose, onSaved }: Props) {
         price: parseFloat(price),
         stock: parseInt(stock, 10),
         sku,
+        categoryId: categoryId === "" ? undefined : categoryId,
       };
 
       if (isEdit) {
@@ -84,6 +104,26 @@ export default function ProductModal({ product, onClose, onSaved }: Props) {
             <Input label="Stock" type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} required />
           </div>
           <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required />
+
+          <div className="space-y-1">
+            <label htmlFor="category" className="text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <select
+              id="category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value === "" ? "" : Number(e.target.value))}
+              disabled={categoriesLoading}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-500"
+            >
+              <option value="">{categoriesLoading ? "Loading..." : "Select a category"}</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>

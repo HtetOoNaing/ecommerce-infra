@@ -49,7 +49,34 @@ export function createPaginatedResponseSchema<T>(itemSchema: z.ZodSchema<T>) {
 
 export const UsersListSchema = createPaginatedResponseSchema(UserSchema);
 
+// ─── Category Schemas ─────────────────────────────────
+export const CategorySchema = z.object({
+  id: z.number(),
+  name: z.string().min(1).max(100),
+  slug: z.string().min(1).max(100),
+  description: z.string().optional().nullable(),
+  isActive: z.boolean(),
+  createdAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime().optional(),
+});
+
+export const CategoriesListSchema = createPaginatedResponseSchema(CategorySchema);
+
+export const CreateCategorySchema = z.object({
+  name: z.string().min(1).max(100),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
+  description: z.string().optional(),
+});
+
+export const UpdateCategorySchema = CreateCategorySchema.partial();
+
 // ─── Product Schemas ──────────────────────────────────
+export const CategoryInfoSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1).max(100),
+  slug: z.string().min(1).max(100),
+});
+
 export const ProductSchema = z.object({
   id: z.number(),
   name: z.string().min(1).max(255),
@@ -59,6 +86,8 @@ export const ProductSchema = z.object({
   stock: z.number().int().min(0),
   isActive: z.boolean(),
   createdBy: z.number().int(),
+  categoryId: z.number().nullable().optional(),
+  category: CategoryInfoSchema.nullable().optional(),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),
 });
@@ -72,9 +101,18 @@ export const CreateProductSchema = z.object({
   price: z.number().positive(),
   stock: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
+  categoryId: z.number().optional(),
 });
 
-export const UpdateProductSchema = CreateProductSchema.partial();
+export const UpdateProductSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  sku: z.string().min(1).max(100).optional(),
+  description: z.string().optional(),
+  price: z.number().positive().optional(),
+  stock: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
+  categoryId: z.number().nullable().optional(),
+});
 
 // ─── API Error Schema ────────────────────────────────
 export const ApiErrorSchema = z.object({

@@ -19,6 +19,16 @@ export {
   deleteProduct,
 } from "./products";
 
+// ─── Categories API ──────────────────────────────────
+export {
+  getCategories,
+  getCategory,
+  getCategoryBySlug,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "./categories";
+
 // ─── Client utilities ────────────────────────────────
 export {
   ApiError,

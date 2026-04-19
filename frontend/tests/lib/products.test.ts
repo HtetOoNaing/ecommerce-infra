@@ -15,10 +15,12 @@ beforeEach(() => {
 
 // ─── Products API ───────────────────────────────────
 describe("getProducts", () => {
-  it("returns list of products", async () => {
-    const products = await getProducts();
-    expect(products).toHaveLength(2);
-    expect(products[0].name).toBe("MacBook Pro");
+  it("returns paginated list of products", async () => {
+    const response = await getProducts();
+    expect(response.data).toHaveLength(2);
+    expect(response.data[0].name).toBe("MacBook Pro");
+    expect(response.total).toBe(2);
+    expect(response.page).toBe(1);
   });
 });
 

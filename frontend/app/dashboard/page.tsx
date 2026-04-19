@@ -17,9 +17,9 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [u, p] = await Promise.all([getUsers(), getProducts()]);
-        setUsers(u);
-        setProducts(p);
+        const [usersRes, productsRes] = await Promise.all([getUsers(), getProducts()]);
+        setUsers(usersRes.data);
+        setProducts(productsRes.data);
       } catch {
         // toasts handled by API layer
       } finally {

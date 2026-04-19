@@ -7,13 +7,14 @@ beforeEach(() => {
 
 // ─── Users API ──────────────────────────────────────
 describe("getUsers", () => {
-  it("returns list of users when authenticated", async () => {
+  it("returns paginated list of users when authenticated", async () => {
     // Need auth first
     await login("admin@test.com", "Test1234!");
     expect(getAccessToken()).toBeTruthy();
 
-    const users = await getUsers();
-    expect(users).toHaveLength(2);
-    expect(users[0].email).toBe("admin@test.com");
+    const response = await getUsers();
+    expect(response.data).toHaveLength(2);
+    expect(response.data[0].email).toBe("admin@test.com");
+    expect(response.total).toBe(2);
   });
 });

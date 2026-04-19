@@ -50,7 +50,8 @@ export default function ProductsPage() {
       products.filter(
         (p) =>
           p.name.toLowerCase().includes(search.toLowerCase()) ||
-          p.sku.toLowerCase().includes(search.toLowerCase())
+          p.sku.toLowerCase().includes(search.toLowerCase()) ||
+          (p.category?.name?.toLowerCase().includes(search.toLowerCase()) ?? false)
       ),
     [products, search]
   );
@@ -79,7 +80,7 @@ export default function ProductsPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-        <TableSkeleton rows={6} cols={5} />
+        <TableSkeleton rows={6} cols={6} />
       </div>
     );
   }
@@ -128,6 +129,7 @@ export default function ProductsPage() {
                   <tr className="border-b border-gray-100 bg-gray-50/50">
                     <th className="text-left px-4 py-3 font-medium text-gray-500">Name</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-500">SKU</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-500">Category</th>
                     <th className="text-right px-4 py-3 font-medium text-gray-500">Price</th>
                     <th className="text-right px-4 py-3 font-medium text-gray-500">Stock</th>
                     <th className="text-center px-4 py-3 font-medium text-gray-500">Status</th>
@@ -139,6 +141,9 @@ export default function ProductsPage() {
                     <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-3 font-medium text-gray-900">{product.name}</td>
                       <td className="px-4 py-3 text-gray-500 font-mono text-xs">{product.sku}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {product.category?.name ?? <span className="text-gray-400 italic">Uncategorized</span>}
+                      </td>
                       <td className="px-4 py-3 text-right text-gray-900">${product.price}</td>
                       <td className="px-4 py-3 text-right text-gray-500">{product.stock}</td>
                       <td className="px-4 py-3 text-center">
