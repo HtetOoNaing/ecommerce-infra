@@ -614,6 +614,17 @@ describe("POST /api/v1/auth/login", () => {
 | PUT | `/:id` | ✅ admin | Update category |
 | DELETE | `/:id` | ✅ admin | Delete category |
 
+### Order Routes (`/api/v1/orders`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | ✅ admin | List all orders (paginated) |
+| GET | `/:id` | ✅ | Get order by ID |
+| GET | `/user/:userId` | ✅ | Get orders by user ID |
+| POST | `/` | ✅ | Create new order |
+| PUT | `/:id` | ✅ admin | Update order status |
+| DELETE | `/:id` | ✅ admin | Delete order |
+
 ### Other
 
 | Method | Path | Auth | Description |
@@ -671,6 +682,37 @@ describe("POST /api/v1/auth/login", () => {
 }
 ```
 
+## Order Model Fields
+
+```typescript
+{
+  id: number;
+  userId: number;           // FK → users.id
+  status: OrderStatus;      // pending | processing | shipped | delivered | cancelled
+  paymentStatus: PaymentStatus; // pending | paid | failed | refunded
+  totalAmount: number;       // DECIMAL(10,2)
+  shippingAddress: string;  // Text
+  billingAddress: string | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## OrderItem Model Fields
+
+```typescript
+{
+  id: number;
+  orderId: number;          // FK → orders.id
+  productId: number;      // FK → products.id
+  quantity: number;        // INTEGER, min: 1
+  unitPrice: number;        // DECIMAL(10,2) - price at time of order
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
 ## Docker Context
 
 | Container | Name | Port |
@@ -687,7 +729,7 @@ describe("POST /api/v1/auth/login", () => {
 
 - [x] Sequelize CLI migrations for production schema management
 - [x] Product categories / tags
-- [ ] Order management module
+- [x] Order management module
 - [ ] Rate limiting per-user (currently global + auth-specific)
 - [ ] Helmet middleware for security headers
 - [ ] Expand integration test coverage
