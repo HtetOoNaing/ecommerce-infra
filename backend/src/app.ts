@@ -3,6 +3,7 @@ import cors from "cors";
 import userRoutes from "@/modules/user/user.routes";
 import authRoutes from "@/modules/auth/auth.routes";
 import productRoutes from "@/modules/product/product.routes";
+import categoryRoutes from "@/modules/category/category.routes";
 import healthRoutes from "@/modules/health/health.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { connectDB } from "./config/db";
@@ -32,6 +33,7 @@ app.use(globalRateLimiter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/categories", categoryRoutes);
 
 // Health check — no rate limit, no auth (used by Docker healthcheck + load balancers)
 app.use(healthRoutes);

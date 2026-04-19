@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "@/config/db";
 import { User } from "@/modules/user/user.model";
+import { Category } from "@/modules/category/category.model";
 
 interface ProductAttributes {
   id: number;
@@ -11,12 +12,13 @@ interface ProductAttributes {
   sku: string;
   isActive: boolean;
   createdBy: number;
+  categoryId: number | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 interface ProductCreationAttributes
-  extends Optional<ProductAttributes, "id" | "description" | "isActive"> {}
+  extends Optional<ProductAttributes, "id" | "description" | "isActive" | "categoryId"> {}
 
 export class Product
   extends Model<ProductAttributes, ProductCreationAttributes>
@@ -30,6 +32,7 @@ export class Product
   public sku!: string;
   public isActive!: boolean;
   public createdBy!: number;
+  public categoryId!: number | null;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -77,6 +80,14 @@ Product.init(
         key: "id",
       },
     },
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "categories",
+        key: "id",
+      },
+    },
   },
   {
     sequelize,
@@ -89,3 +100,6 @@ Product.init(
 // Associations
 Product.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
 User.hasMany(Product, { foreignKey: "createdBy", as: "products" });
+
+Product.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
+Category.hasMany(Product, { foreignKey: "categoryId", as: "products" });

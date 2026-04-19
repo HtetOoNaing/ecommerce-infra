@@ -10,6 +10,7 @@ export const createProductSchema = z.object({
     .min(3, "SKU must be at least 3 characters")
     .max(50)
     .regex(/^[A-Za-z0-9-]+$/, "SKU must be alphanumeric with hyphens only"),
+  categoryId: z.number().int().positive().optional(),
 });
 
 export const updateProductSchema = z.object({
@@ -24,6 +25,7 @@ export const updateProductSchema = z.object({
     .regex(/^[A-Za-z0-9-]+$/)
     .optional(),
   isActive: z.boolean().optional(),
+  categoryId: z.number().int().positive().nullable().optional(),
 });
 
 export const paginationQuerySchema = z.object({

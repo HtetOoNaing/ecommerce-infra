@@ -597,11 +597,22 @@ describe("POST /api/v1/auth/login", () => {
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/` | — | List all products |
+| GET | `/` | — | List all products (paginated) |
 | GET | `/:id` | — | Get product |
 | POST | `/` | ✅ admin | Create product |
 | PUT | `/:id` | ✅ admin | Update product |
 | DELETE | `/:id` | ✅ admin | Delete product |
+
+### Category Routes (`/api/v1/categories`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | — | List all categories (paginated) |
+| GET | `/:id` | — | Get category by ID |
+| GET | `/slug/:slug` | — | Get category by slug |
+| POST | `/` | ✅ admin | Create category |
+| PUT | `/:id` | ✅ admin | Update category |
+| DELETE | `/:id` | ✅ admin | Delete category |
 
 ### Other
 
@@ -640,6 +651,21 @@ describe("POST /api/v1/auth/login", () => {
   sku: string;         // unique
   isActive: boolean;
   createdBy: number;   // FK → users.id
+  categoryId: number | null;  // FK → categories.id
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## Category Model Fields
+
+```typescript
+{
+  id: number;
+  name: string;
+  slug: string;        // unique, lowercase alphanumeric with hyphens
+  description: string | null;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -659,8 +685,8 @@ describe("POST /api/v1/auth/login", () => {
 
 ## Known TODOs / Planned Work
 
-- [ ] Sequelize CLI migrations for production schema management
-- [ ] Product categories / tags
+- [x] Sequelize CLI migrations for production schema management
+- [x] Product categories / tags
 - [ ] Order management module
 - [ ] Rate limiting per-user (currently global + auth-specific)
 - [ ] Helmet middleware for security headers

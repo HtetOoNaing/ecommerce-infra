@@ -1,4 +1,5 @@
 import { Product } from "./product.model";
+import { Category } from "@/modules/category/category.model";
 import { CreateProductDto, UpdateProductDto, ProductEntity, PaginatedResponse } from "./product.types";
 
 export class ProductRepository {
@@ -27,6 +28,20 @@ export class ProductRepository {
   async findById(id: number): Promise<ProductEntity | null> {
     const product = await Product.findByPk(id);
     return product ? (product.toJSON() as ProductEntity) : null;
+  }
+
+  async findByIdWithCategory(id: number): Promise<(ProductEntity & { category?: { id: number; name: string; slug: string } | null }) | null> {
+    const product = await Product.findByPk(id, {
+      include: [
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name", "slug"],
+        },
+      ],
+    });
+    if (!product) return null;
+    return product.toJSON() as ProductEntity & { category?: { id: number; name: string; slug: string } | null };
   }
 
   async findBySku(sku: string): Promise<ProductEntity | null> {

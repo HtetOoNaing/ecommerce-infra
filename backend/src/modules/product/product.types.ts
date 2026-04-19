@@ -1,3 +1,9 @@
+export interface CategoryInfo {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface ProductEntity {
   id: number;
   name: string;
@@ -7,6 +13,7 @@ export interface ProductEntity {
   sku: string;
   isActive: boolean;
   createdBy: number;
+  categoryId: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +27,8 @@ export interface ProductResponseDto {
   sku: string;
   isActive: boolean;
   createdBy: number;
+  categoryId: number | null;
+  category?: CategoryInfo | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +40,7 @@ export interface CreateProductDto {
   stock: number;
   sku: string;
   createdBy: number;
+  categoryId?: number;
 }
 
 export interface UpdateProductDto {
@@ -40,6 +50,7 @@ export interface UpdateProductDto {
   stock?: number;
   sku?: string;
   isActive?: boolean;
+  categoryId?: number | null;
 }
 
 // Pagination
