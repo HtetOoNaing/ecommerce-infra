@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CartProvider } from "@/lib/context/CartContext";
+import { CustomerAuthProvider } from "@/lib/context/CustomerAuthContext";
 
 export const metadata: Metadata = {
   title: "InfraPro Store",
@@ -13,7 +15,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <CustomerAuthProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </CustomerAuthProvider>
+      </body>
     </html>
   );
 }

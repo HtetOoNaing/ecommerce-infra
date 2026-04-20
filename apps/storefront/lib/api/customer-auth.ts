@@ -1,5 +1,10 @@
-import { apiClient, ApiError } from "./client";
-import { setAccessToken, setRefreshToken } from "@infrapro/api-client";
+import {
+  apiClient,
+  ApiError,
+  setCustomerAccessToken,
+  setCustomerRefreshToken,
+  clearCustomerTokens,
+} from "./client";
 import type { Customer, CustomerAuthResponse } from "@infrapro/shared-types";
 
 export async function registerCustomer(data: {
@@ -13,8 +18,9 @@ export async function registerCustomer(data: {
     data
   );
   const { accessToken, refreshToken, customer } = response.data;
-  setAccessToken(accessToken);
-  setRefreshToken(refreshToken);
+  setCustomerAccessToken(accessToken);
+  setCustomerRefreshToken(refreshToken);
+  setStoredCustomer(customer);
   return { customer, accessToken, refreshToken };
 }
 
@@ -27,8 +33,9 @@ export async function loginCustomer(
     { email, password }
   );
   const { accessToken, refreshToken, customer } = response.data;
-  setAccessToken(accessToken);
-  setRefreshToken(refreshToken);
+  setCustomerAccessToken(accessToken);
+  setCustomerRefreshToken(refreshToken);
+  setStoredCustomer(customer);
   return { customer, accessToken, refreshToken };
 }
 
@@ -41,15 +48,13 @@ export async function logoutCustomer(): Promise<void> {
 }
 
 export function clearCustomerAuth(): void {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("customer");
+  clearCustomerTokens();
 }
 
 export function getStoredCustomer(): Customer | null {
   if (typeof window === "undefined") return null;
   const stored = localStorage.getItem("customer");
-  return stored ? JSON.parse(stored) : null;
+  return stored ? (JSON.parse(stored) as Customer) : null;
 }
 
 export function setStoredCustomer(customer: Customer): void {

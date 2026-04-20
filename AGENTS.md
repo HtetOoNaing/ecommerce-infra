@@ -9,7 +9,7 @@ Before making any change, identify which app/package is affected and check the r
 **Sub-agent rule files (ALWAYS check these for domain-specific rules):**
 - `apps/backend/AGENTS.md` — Express API rules
 - `apps/admin/AGENTS.md` — Admin dashboard rules
-- `apps/storefront/AGENTS.md` — Storefront rules (once created)
+- `apps/storefront/AGENTS.md` — Storefront rules
 
 > If a sub-AGENTS.md exists for the scope of work, its rules take precedence over this file.
 

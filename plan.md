@@ -95,29 +95,29 @@ ecommerce-infra/
 
 > **Note on Orders:** Keep `orders.userId` pointing to `customers.id` for storefront orders. Admin-created orders can reference `admin_users.id` with a `createdByAdminId` field.
 
-### Phase 3 — Storefront App [IN PROGRESS]
+### Phase 3 — Storefront App [DONE]
 > Goal: customer-facing Next.js app with full shopping journey
 
 **Scaffold:**
 - [x] Create `apps/storefront/` (Next.js 16, TypeScript, Tailwind CSS 4)
 - [x] Set up `@infrapro/shared-types`, `@infrapro/ui`, `@infrapro/api-client` imports
-- [ ] Create `storefront/AGENTS.md`
+- [x] Create `storefront/AGENTS.md`
 - [x] Add `storefront` service to `docker-compose.yml`
 - [x] Update `nginx.conf` — route `infra-pro.com` → storefront, IP-restrict admin
 
 **Pages:**
-- [ ] Homepage (`/`) — hero banner, featured products, categories
-- [ ] Product listing (`/products`) — grid, search, filter by category, pagination
-- [ ] Product detail (`/products/[id]`) — images, description, add to cart (ISR)
-- [ ] Cart (`/cart`) — line items, quantity update, remove, subtotal
-- [ ] Checkout (`/checkout`) — shipping address form, order summary
-- [ ] Order confirmation (`/orders/[id]`) — post-checkout success page
-- [ ] Order history (`/account/orders`) — customer's past orders
-- [ ] Customer auth pages — login, register, forgot-password
+- [x] Homepage (`/`) — hero banner, featured products, categories
+- [x] Product listing (`/products`) — grid, search, filter by category, pagination
+- [x] Product detail (`/products/[id]`) — images, description, add to cart (ISR)
+- [x] Cart (`/cart`) — line items, quantity update, remove, subtotal
+- [x] Checkout (`/checkout`) — shipping address form, order summary
+- [x] Order confirmation (`/orders/[id]`) — post-checkout success page
+- [x] Order history (`/account/orders`) — customer's past orders
+- [x] Customer auth pages — login, register, forgot-password
 
 **State:**
-- [ ] `CartContext` — localStorage-persisted cart, merge on login
-- [ ] `CustomerAuthContext` — customer-specific auth (separate from admin `useAuth`)
+- [x] `CartContext` — localStorage-persisted cart, merge on login
+- [x] `CustomerAuthContext` — customer-specific auth (separate from admin `useAuth`)
 
 **API client additions:**
 - [ ] `packages/api-client/customer-auth.ts` — register, login, logout

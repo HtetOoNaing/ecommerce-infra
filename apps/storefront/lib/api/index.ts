@@ -9,3 +9,4 @@ export {
 } from "./customer-auth";
 export { getProducts, getProduct, searchProducts, getProductsByCategory } from "./products";
 export { getCategories, getCategory, getCategoryBySlug } from "./categories";
+export { createOrder, getCustomerOrders, getOrder } from "./orders";
