@@ -18,7 +18,9 @@ export interface OrderItemEntity {
 
 export interface OrderEntity {
   id: number;
-  userId: number;
+  userId: number | null;
+  customerId: number | null;
+  stripePaymentIntentId: string | null;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   totalAmount: number;
@@ -41,11 +43,13 @@ export interface OrderItemDto {
 }
 
 export interface CreateOrderDto {
-  userId: number;
+  userId?: number | null;
+  customerId?: number | null;
   items: OrderItemDto[];
   shippingAddress: string;
   billingAddress?: string;
   notes?: string;
+  stripePaymentIntentId?: string;
 }
 
 export interface UpdateOrderDto {
@@ -58,7 +62,9 @@ export interface UpdateOrderDto {
 
 export interface OrderResponseDto {
   id: number;
-  userId: number;
+  userId: number | null;
+  customerId: number | null;
+  stripePaymentIntentId: string | null;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   totalAmount: number;

@@ -1,37 +1,42 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "@/config/db";
 import { User } from "@/modules/user/user.model";
+import { Customer } from "@/modules/customer/customer.model";
 import { Product } from "@/modules/product/product.model";
 import { OrderStatus, PaymentStatus } from "./order.types";
 
 interface OrderAttributes {
   id: number;
-  userId: number;
+  userId: number | null;
+  customerId: number | null;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   totalAmount: number;
   shippingAddress: string;
   billingAddress: string | null;
   notes: string | null;
+  stripePaymentIntentId: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 interface OrderCreationAttributes
-  extends Optional<OrderAttributes, "id" | "status" | "paymentStatus" | "billingAddress" | "notes"> {}
+  extends Optional<OrderAttributes, "id" | "status" | "paymentStatus" | "userId" | "customerId" | "billingAddress" | "notes" | "stripePaymentIntentId"> {}
 
 export class Order
   extends Model<OrderAttributes, OrderCreationAttributes>
   implements OrderAttributes
 {
   public id!: number;
-  public userId!: number;
+  public userId!: number | null;
+  public customerId!: number | null;
   public status!: OrderStatus;
   public paymentStatus!: PaymentStatus;
   public totalAmount!: number;
   public shippingAddress!: string;
   public billingAddress!: string | null;
   public notes!: string | null;
+  public stripePaymentIntentId!: string | null;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -46,11 +51,24 @@ Order.init(
     },
     userId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "users",
         key: "id",
       },
+    },
+    customerId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "customers",
+        key: "id",
+      },
+    },
+    stripePaymentIntentId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
     },
     status: {
       type: DataTypes.ENUM("pending", "processing", "shipped", "delivered", "cancelled"),
@@ -161,6 +179,9 @@ OrderItem.init(
 // Associations
 Order.belongsTo(User, { foreignKey: "userId", as: "user" });
 User.hasMany(Order, { foreignKey: "userId", as: "orders" });
+
+Order.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(Order, { foreignKey: "customerId", as: "orders" });
 
 Order.hasMany(OrderItem, { foreignKey: "orderId", as: "items" });
 OrderItem.belongsTo(Order, { foreignKey: "orderId", as: "order" });

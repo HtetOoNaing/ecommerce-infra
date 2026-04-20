@@ -70,7 +70,7 @@ ecommerce-infra/
 - [x] Update `docker-compose.yml` build contexts
 - [x] Verify all tests pass
 
-### Phase 2 — Separate Customer Auth [IN PROGRESS]
+### Phase 2 — Separate Customer Auth [DONE]
 > Goal: customers and admins use separate DB tables and JWT secrets
 
 **Backend:**
@@ -96,6 +96,7 @@ ecommerce-infra/
 > **Note on Orders:** Keep `orders.userId` pointing to `customers.id` for storefront orders. Admin-created orders can reference `admin_users.id` with a `createdByAdminId` field.
 
 ### Phase 3 — Storefront App [DONE]
+
 > Goal: customer-facing Next.js app with full shopping journey
 
 **Scaffold:**
@@ -120,18 +121,29 @@ ecommerce-infra/
 - [x] `CustomerAuthContext` — customer-specific auth (separate from admin `useAuth`)
 
 **API client additions:**
-- [ ] `packages/api-client/customer-auth.ts` — register, login, logout
-- [ ] `packages/api-client/customer-profile.ts` — profile, addresses
-- [ ] Cart is frontend-only (no API until checkout)
+- [x] `apps/storefront/lib/api/customer-auth.ts` — register, login, logout (app-level, not in shared package per AGENTS.md rules)
+- [x] `apps/storefront/lib/api/orders.ts` — createOrder, getCustomerOrders, getOrder
+- [x] Cart is frontend-only (no API until checkout)
 
-### Phase 4 — Checkout & Payments
+### Phase 4 — Checkout & Payments [DONE]
 > Goal: end-to-end purchase flow
 
-- [ ] Stripe integration — `POST /checkout` creates PaymentIntent
-- [ ] Stripe webhook handler — `POST /webhooks/stripe` updates `paymentStatus`
-- [ ] Order creation on payment success
-- [ ] Stock decrement on confirmed payment (not on cart add)
-- [ ] Email confirmation on order placed (BullMQ email job already exists ✅)
+**Backend:**
+- [x] Migration: add `customerId` (FK → customers), `stripePaymentIntentId` to orders; make `userId` nullable
+- [x] Update `Order` model + `order.types.ts` with new fields
+- [x] Add `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` to `env.ts`
+- [x] Create `checkout` module (`POST /api/v1/checkout` — creates PaymentIntent)
+- [x] Create `POST /api/v1/webhooks/stripe` handler (raw body + signature verification)
+- [x] On `payment_intent.succeeded`: create Order, decrement stock, send email (BullMQ ✅)
+- [x] Unit tests: CheckoutService (9 tests)
+- [x] Integration tests: checkout validation (8 tests)
+
+**Storefront:**
+- [x] Add `@stripe/stripe-js` + `@stripe/react-stripe-js` to storefront
+- [x] Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` env var
+- [x] Create `lib/stripe.ts` — Stripe.js initialization
+- [x] Update `/checkout` page to use Stripe Elements + PaymentElement
+- [x] Create `/orders/confirmation` page — Stripe redirect handler
 
 ### Phase 5 — Admin Security Hardening
 > Goal: production-grade admin access control

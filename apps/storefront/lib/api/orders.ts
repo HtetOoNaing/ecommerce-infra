@@ -1,5 +1,11 @@
 import { apiClient, ApiError } from "./client";
-import type { Order } from "@infrapro/shared-types";
+import type {
+  Order,
+  CreateCheckoutDto,
+  CheckoutSessionResponse,
+} from "@infrapro/shared-types";
+
+export type { CreateCheckoutDto };
 
 export interface CreateOrderPayload {
   items: Array<{ productId: number; quantity: number }>;
@@ -11,6 +17,13 @@ export interface CreateOrderPayload {
     zip: string;
     country: string;
   };
+}
+
+export async function createCheckoutSession(
+  dto: CreateCheckoutDto
+): Promise<CheckoutSessionResponse> {
+  const response = await apiClient.post<CheckoutSessionResponse>("/checkout", dto);
+  return response.data;
 }
 
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {

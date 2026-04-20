@@ -7,6 +7,7 @@ import categoryRoutes from "@/modules/category/category.routes";
 import orderRoutes from "@/modules/order/order.routes";
 import healthRoutes from "@/modules/health/health.routes";
 import customerRoutes from "@/modules/customer/customer.routes";
+import { checkoutRouter, webhookRouter } from "@/modules/checkout/checkout.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { connectDB } from "./config/db";
 import { corsOptions } from "./middlewares/cors.middleware";
@@ -24,6 +25,11 @@ const app = express();
 app.set("trust proxy", 1);
 
 app.use(cors(corsOptions));
+
+// Stripe webhook — MUST be registered with raw body BEFORE express.json()
+// Stripe signature verification requires the raw Buffer, not parsed JSON
+app.use("/api/v1/webhooks", express.raw({ type: "application/json" }), webhookRouter);
+
 app.use(express.json());
 app.use(metricsMiddleware);
 app.use(requestIdMiddleware);
@@ -38,6 +44,7 @@ app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/customer", customerRoutes);
+app.use("/api/v1/checkout", checkoutRouter);
 
 // Health check — no rate limit, no auth (used by Docker healthcheck + load balancers)
 app.use(healthRoutes);

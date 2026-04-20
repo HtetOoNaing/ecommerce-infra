@@ -34,6 +34,9 @@ export type {
   PaymentStatus,
   OrderItem,
   Order,
+  ShippingAddress,
+  CreateCheckoutDto,
+  CheckoutSessionResponse,
   CreateOrderDto,
   UpdateOrderDto,
 } from "./order";

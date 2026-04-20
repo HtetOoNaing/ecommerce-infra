@@ -21,7 +21,9 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
-  userId: number;
+  userId: number | null;
+  customerId: number | null;
+  stripePaymentIntentId: string | null;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   totalAmount: number;
@@ -38,12 +40,32 @@ export interface Order {
   updatedAt: string;
 }
 
+export interface ShippingAddress {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+export interface CreateCheckoutDto {
+  items: { productId: number; quantity: number }[];
+  shippingAddress: ShippingAddress;
+}
+
+export interface CheckoutSessionResponse {
+  clientSecret: string;
+}
+
 export interface CreateOrderDto {
-  userId: number;
+  userId?: number | null;
+  customerId?: number | null;
   items: { productId: number; quantity: number }[];
   shippingAddress: string;
   billingAddress?: string;
   notes?: string;
+  stripePaymentIntentId?: string;
 }
 
 export interface UpdateOrderDto {
