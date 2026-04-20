@@ -37,3 +37,13 @@ export type {
   CreateOrderDto,
   UpdateOrderDto,
 } from "./order";
+
+// ─── Customer ───────────────────────────────────────────
+export type {
+  Customer,
+  CreateCustomerDto,
+  UpdateCustomerDto,
+  CustomerLoginDto,
+  CustomerAuthResponse,
+  AddAddressDto,
+} from "./customer";

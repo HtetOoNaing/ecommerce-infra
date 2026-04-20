@@ -48,47 +48,47 @@ ecommerce-infra/
 
 ## Phase Roadmap
 
-### Phase 1 — Monorepo Restructure
+### Phase 1 — Monorepo Restructure [DONE]
 > Goal: reorganize into `apps/` + `packages/` without breaking anything
 
-- [ ] Set up `pnpm-workspace.yaml`
-- [ ] Set up `turbo.json` with build/test/lint pipelines
-- [ ] Move `frontend/` → `apps/admin/`
-- [ ] Move `backend/` → `apps/backend/`
-- [ ] Create `packages/shared-types/` — extract types from both apps
-- [ ] Create `packages/ui/` — extract Button, Badge, Input, etc.
-- [ ] Create `packages/api-client/` — axios-based client replacing current fetch-based `client.ts`
-  - [ ] `createApiClient(config)` factory — returns configured axios instance
-  - [ ] Request interceptor: inject `Authorization: Bearer <token>` header
-  - [ ] Response interceptor: 401 refresh token queue, `AxiosError` → `ApiError` transform
-  - [ ] `axios-retry`: retries on 5xx + `ECONNABORTED`, exponential backoff, never retries 4xx
-  - [ ] `ApiError` class: `status`, `message`, `errors[]`
-  - [ ] Token helpers: `getAccessToken`, `setAccessToken`, `getRefreshToken`, `setRefreshToken`, `clearAuth`
-  - [ ] Separate instances for admin and customer (Phase 2+)
-- [ ] Migrate `frontend/lib/api/client.ts` to use `packages/api-client` axios instance
-- [ ] Update all import paths in admin and backend
-- [ ] Update `docker-compose.yml` build contexts
-- [ ] Verify all tests pass
+- [x] Set up `pnpm-workspace.yaml`
+- [x] Set up `turbo.json` with build/test/lint pipelines
+- [x] Move `frontend/` → `apps/admin/`
+- [x] Move `backend/` → `apps/backend/`
+- [x] Create `packages/shared-types/` — extract types from both apps
+- [x] Create `packages/ui/` — extract Button, Badge, Input, etc.
+- [x] Create `packages/api-client/` — axios-based client replacing current fetch-based `client.ts`
+  - [x] `createApiClient(config)` factory — returns configured axios instance
+  - [x] Request interceptor: inject `Authorization: Bearer <token>` header
+  - [x] Response interceptor: 401 refresh token queue, `AxiosError` → `ApiError` transform
+  - [x] `axios-retry`: retries on 5xx + `ECONNABORTED`, exponential backoff, never retries 4xx
+  - [x] `ApiError` class: `status`, `message`, `errors[]`
+  - [x] Token helpers: `getAccessToken`, `setAccessToken`, `getRefreshToken`, `setRefreshToken`, `clearAuth`
+  - [x] Separate instances for admin and customer (Phase 2+)
+- [x] Migrate `frontend/lib/api/client.ts` to use `packages/api-client` axios instance
+- [x] Update all import paths in admin and backend
+- [x] Update `docker-compose.yml` build contexts
+- [x] Verify all tests pass
 
-### Phase 2 — Separate Customer Auth
+### Phase 2 — Separate Customer Auth [IN PROGRESS]
 > Goal: customers and admins use separate DB tables and JWT secrets
 
 **Backend:**
-- [ ] Create `customers` table migration (email, password_hash, name, phone, email_verified, shipping_addresses jsonb)
-- [ ] Create `Customer` Sequelize model
-- [ ] Create `customer-auth` module (`/api/v1/customer/auth/*`)
-  - [ ] `POST /customer/auth/register` — creates customer, NOT admin user
-  - [ ] `POST /customer/auth/login` — issues customer JWT (separate secret)
-  - [ ] `POST /customer/auth/refresh`
-  - [ ] `POST /customer/auth/forgot-password`
-  - [ ] `POST /customer/auth/reset-password`
-- [ ] Add `CUSTOMER_JWT_ACCESS_SECRET` and `CUSTOMER_JWT_REFRESH_SECRET` env vars
-- [ ] Create `customerAuthenticate` middleware (validates customer JWT only)
-- [ ] Create `customer-profile` module (`/api/v1/customer/profile`)
-  - [ ] `GET /customer/profile`
-  - [ ] `PUT /customer/profile`
-  - [ ] `GET /customer/addresses`
-  - [ ] `POST /customer/addresses`
+- [x] Create `customers` table migration (email, password_hash, name, phone, email_verified, shipping_addresses jsonb)
+- [x] Create `Customer` Sequelize model
+- [x] Create `customer-auth` module (`/api/v1/customer/auth/*`)
+  - [x] `POST /customer/auth/register` — creates customer, NOT admin user
+  - [x] `POST /customer/auth/login` — issues customer JWT (separate secret)
+  - [x] `POST /customer/auth/refresh`
+  - [x] `POST /customer/auth/forgot-password`
+  - [x] `POST /customer/auth/reset-password`
+- [x] Add `CUSTOMER_JWT_ACCESS_SECRET` and `CUSTOMER_JWT_REFRESH_SECRET` env vars
+- [x] Create `customerAuthenticate` middleware (validates customer JWT only)
+- [x] Create `customer-profile` module (`/api/v1/customer/profile`)
+  - [x] `GET /customer/profile`
+  - [x] `PUT /customer/profile`
+  - [x] `GET /customer/addresses`
+  - [x] `POST /customer/addresses`
 - [ ] Update `Order` to reference `customers.id` (or keep `userId` flexible — see note)
 - [ ] Add unit + integration tests for all new modules
 - [ ] Update `backend/AGENTS.md`

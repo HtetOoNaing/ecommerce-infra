@@ -6,6 +6,7 @@ import productRoutes from "@/modules/product/product.routes";
 import categoryRoutes from "@/modules/category/category.routes";
 import orderRoutes from "@/modules/order/order.routes";
 import healthRoutes from "@/modules/health/health.routes";
+import customerRoutes from "@/modules/customer/customer.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { connectDB } from "./config/db";
 import { corsOptions } from "./middlewares/cors.middleware";
@@ -36,6 +37,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/customer", customerRoutes);
 
 // Health check — no rate limit, no auth (used by Docker healthcheck + load balancers)
 app.use(healthRoutes);
