@@ -97,10 +97,14 @@ This project uses **two separate auth systems**. Treat them as completely indepe
 - No `useRouter`, no `useAuth`, no `useToast` — those are app-level
 
 ### `packages/api-client`
-- `request()`, `ApiError`, token helpers
-- No React — must be usable in non-React contexts (e.g. scripts)
+- Exports `createApiClient(config)` factory — returns a configured **axios instance** with interceptors attached
+- Exports `ApiError` class — the only error type domain files ever throw or catch
+- Exports token helpers: `getAccessToken`, `setAccessToken`, `getRefreshToken`, `setRefreshToken`, `clearAuth`
+- No React — must be usable in non-React contexts (e.g. scripts, Node.js)
 - No app-specific business logic
-- Auth helpers must support both admin tokens and customer tokens (separate functions)
+- Auth helpers must support both admin tokens and customer tokens (separate instances, separate token keys)
+- `axios-retry` configured on the instance: retries on 5xx and `ECONNABORTED` with exponential backoff — never retries 4xx
+- Each app (`admin`, `storefront`) calls `createApiClient()` with its own `baseURL` and token getters
 
 ---
 
@@ -198,6 +202,11 @@ import { Order } from "../../packages/shared-types/src/order";
 8. **Using `any` TypeScript type — use `unknown` with type guards**
 9. **Exposing admin container port without IP restriction in nginx**
 10. **Adding CORS headers in Express — handled by nginx**
+11. **Calling `axios.get/post/...` directly — always use the `apiClient` instance from `packages/api-client`**
+12. **Using axios `CancelToken` — deprecated; use `AbortController` with `{ signal }` option**
+13. **Catching `AxiosError` in components or domain files — the interceptor converts it to `ApiError` first**
+14. **Configuring `axios-retry` to retry on 4xx — only retry 5xx and network errors**
+15. **Creating a new axios instance per file — always import the shared configured instance**
 
 ---
 

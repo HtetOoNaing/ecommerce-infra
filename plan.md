@@ -57,7 +57,15 @@ ecommerce-infra/
 - [ ] Move `backend/` → `apps/backend/`
 - [ ] Create `packages/shared-types/` — extract types from both apps
 - [ ] Create `packages/ui/` — extract Button, Badge, Input, etc.
-- [ ] Create `packages/api-client/` — extract request(), ApiError, auth helpers
+- [ ] Create `packages/api-client/` — axios-based client replacing current fetch-based `client.ts`
+  - [ ] `createApiClient(config)` factory — returns configured axios instance
+  - [ ] Request interceptor: inject `Authorization: Bearer <token>` header
+  - [ ] Response interceptor: 401 refresh token queue, `AxiosError` → `ApiError` transform
+  - [ ] `axios-retry`: retries on 5xx + `ECONNABORTED`, exponential backoff, never retries 4xx
+  - [ ] `ApiError` class: `status`, `message`, `errors[]`
+  - [ ] Token helpers: `getAccessToken`, `setAccessToken`, `getRefreshToken`, `setRefreshToken`, `clearAuth`
+  - [ ] Separate instances for admin and customer (Phase 2+)
+- [ ] Migrate `frontend/lib/api/client.ts` to use `packages/api-client` axios instance
 - [ ] Update all import paths in admin and backend
 - [ ] Update `docker-compose.yml` build contexts
 - [ ] Verify all tests pass
@@ -151,12 +159,14 @@ ecommerce-infra/
 |----------|--------|--------|
 | Monorepo tool | Turborepo + pnpm workspaces | Task caching, incremental builds, simple config |
 | Frontend framework | Next.js 16 (both apps) | Consistent, shared knowledge, App Router |
+| HTTP client | Axios (not fetch) | Interceptors for token refresh queue, `axios-retry`, better error handling, TypeScript generics |
 | Separate auth tables | Yes (`customers` + `admin_users`) | Security isolation, schema flexibility |
-| Separate JWT secrets | Yes (4 secrets total) | Compromise of one doesn't affect the other |
+| Separate JWT secrets | Yes (4 secrets total) | Compromise of one doesn’t affect the other |
 | Cart storage | localStorage → Redis on login | No backend needed for guest cart |
 | Payment | Stripe | Industry standard, webhook-driven status updates |
 | MFE pattern | No — two separate apps | MFE solves org-scale problems; overkill here |
 | Search | Client-side filter now; Meilisearch later | Good enough for small catalog |
+| Request cancellation | `AbortController` with axios `signal` | Native API, `CancelToken` deprecated since axios 0.22 |
 
 ---
 

@@ -25,6 +25,7 @@ This project uses **Next.js 16 with React 19** and **Tailwind CSS 4**.
 ### Stack
 - **Framework**: Next.js 16 (App Router), `output: "standalone"` for Docker
 - **UI**: React 19, Tailwind CSS 4, Lucide React icons, `clsx`
+- **HTTP Client**: Axios (with interceptors, retry, token refresh queue)
 - **Charts**: Recharts (mocked in tests — see `tests/setup.ts`)
 - **Testing**: Vitest + Testing Library + MSW (Mock Service Worker) + Playwright
 - **Validation**: Zod for runtime API contract validation
@@ -45,7 +46,7 @@ All API calls use the modular structure in `lib/api/`:
 
 ```
 lib/api/
-├── client.ts     # request(), ApiError, token get/set/clear, loginWithTokens, registerWithTokens
+├── client.ts     # axios instance, ApiError, interceptors, token helpers, loginWithTokens
 ├── auth.ts       # login, register, logout, forgotPassword, resetPassword
 ├── users.ts      # getUsers(page?, limit?) → PaginatedResponse<User>
 ├── products.ts   # getProducts(page?, limit?), getProduct, createProduct, updateProduct, deleteProduct
@@ -59,16 +60,106 @@ lib/api/
 import { login, forgotPassword, getProducts, getProduct, ApiError } from "@/lib/api";
 ```
 
-**Never** import directly from `client.ts` unless you need low-level utilities like `request()` or `clearAuth()`.
+**Never** import directly from `client.ts` unless you need low-level utilities like `apiClient` instance or `clearAuth()`.
 
-### Token Management (client.ts)
+### Axios Client Architecture (client.ts)
+
+`client.ts` exports a configured **axios instance** (not raw axios). All domain API files call this instance.
+
+**Never** call `axios.get/post/...` directly. Always use `apiClient.get/post/...` or the typed `request<T>()` wrapper.
+
+```typescript
+// ✅ Correct
+import { apiClient } from "./client";
+const data = await apiClient.get<Product>(`/products/${id}`);
+
+// ❌ Wrong — bypasses interceptors and error normalization
+import axios from "axios";
+const data = await axios.get(...);
+```
+
+### Axios Instance Config
+
+```typescript
+const apiClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL + "/api/v1",
+  timeout: 15_000,             // 15s hard timeout
+  headers: { "Content-Type": "application/json" },
+  withCredentials: false,      // JWT in Authorization header, not cookies
+});
+```
+
+### Interceptors — Rules
+
+**Request interceptor** — injects `Authorization: Bearer <token>` on every request:
+```typescript
+apiClient.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+```
+
+**Response interceptor** — handles 401 with refresh token queue:
+```typescript
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    // Refresh token queue: prevent concurrent refresh calls
+    // If refreshing, queue the request; resolve/reject after refresh completes
+    // On refresh failure: clearAuth() + redirect to /login
+    // Transform AxiosError → ApiError before re-throwing
+  }
+);
+```
+
+**Key rules for interceptors:**
+- Use a `refreshPromise` variable to **queue** concurrent 401s — never call `/auth/refresh` twice in parallel
+- Always transform `AxiosError` → `ApiError` in the response interceptor so domain files never see raw axios errors
+- Never add business logic to interceptors — only auth and error normalization
+- `axios-retry` handles network errors (5xx, `ECONNABORTED`) with exponential backoff — NOT 4xx errors
+
+### Token Management
 
 Tokens are stored in `localStorage` with these exact keys:
 - `accessToken` — JWT access token (15m expiry)
 - `refreshToken` — JWT refresh token (7d expiry)
 - `user` — JSON stringified `AuthUser` object
 
-On 401 response, `client.ts` automatically attempts `POST /auth/refresh`, retries the original request, and redirects to `/login` if refresh fails.
+On 401 response, the response interceptor:
+1. Queues the failed request
+2. Calls `POST /auth/refresh` **once** (regardless of how many requests are queued)
+3. Retries all queued requests with the new token
+4. On refresh failure: `clearAuth()` → `window.location.href = "/login"`
+
+### ApiError Class
+
+```typescript
+class ApiError extends Error {
+  status: number;
+  errors?: Array<{ message: string; path?: string[] }>;
+}
+```
+
+The response interceptor always converts `AxiosError` to `ApiError` before throwing. Domain files and components **only ever see `ApiError`** — never raw axios errors.
+
+### Request Cancellation
+
+For components that unmount before a request completes, use `AbortController`:
+
+```typescript
+useEffect(() => {
+  const controller = new AbortController();
+  load(controller.signal);
+  return () => controller.abort();
+}, []);
+
+async function load(signal: AbortSignal) {
+  await apiClient.get("/products", { signal });
+}
+```
+
+Axios supports the native `AbortController` `signal` option — use it, do NOT use the deprecated `CancelToken`.
 
 ## Contexts
 
@@ -347,6 +438,17 @@ E2E_BASE_URL=https://app.infra-pro.com
 - Performance: > 90 | Accessibility: > 90 | Best Practices: > 90
 - LCP: < 2.5s | FCP: < 1.8s
 
+## Axios Common Mistakes to Avoid
+
+1. **Using `axios.get(...)` directly** — always use `apiClient.get(...)` (the configured instance)
+2. **Using deprecated `CancelToken`** — use `AbortController` with `{ signal }` option
+3. **Catching `AxiosError` in domain files** — the interceptor converts it; only catch `ApiError`
+4. **Adding auth logic outside `client.ts`** — all token injection/refresh lives in interceptors only
+5. **Calling `/auth/refresh` outside the interceptor** — leads to duplicate refresh calls
+6. **Setting `timeout: 0`** — always set a finite timeout (15_000ms default)
+7. **Using `withCredentials: true`** — this app uses header-based JWT, not cookies
+8. **Retrying 4xx errors** — `axios-retry` must be configured for 5xx and network errors ONLY
+
 ## Pre-Commit Checklist
 
 - [ ] No `console.log` (except inside `catch` blocks)
@@ -357,5 +459,8 @@ E2E_BASE_URL=https://app.infra-pro.com
 - [ ] Tests added for new functionality
 - [ ] Zod schemas in `lib/validators.ts` updated for new API shapes
 - [ ] `isVerified` used for user verification state (not `isActive`)
+- [ ] No direct `axios.get/post/...` calls — use `apiClient` instance
+- [ ] No `CancelToken` usage — use `AbortController`
+- [ ] No `AxiosError` in component-level catch blocks — only `ApiError`
 
 <!-- END:project-rules -->
