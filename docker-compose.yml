@@ -107,6 +107,25 @@ services:
     logging: *logging-defaults
 
   # -----------------------------
+  # Storefront — customer-facing Next.js app
+  # -----------------------------
+  storefront:
+    build:
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+      target: production
+      args:
+        - NEXT_PUBLIC_API_URL=https://api.${DOMAIN:-infra-pro.com}
+    container_name: ecommerce_storefront
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/"]
+    logging: *logging-defaults
+
+  # -----------------------------
   # Worker with retry strategy
   # -----------------------------
   worker:
