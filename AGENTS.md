@@ -7,8 +7,8 @@ This is a **production ecommerce monorepo**. Every change has downstream consequ
 Before making any change, identify which app/package is affected and check the relevant AGENTS.md.
 
 **Sub-agent rule files (ALWAYS check these for domain-specific rules):**
-- `apps/backend/AGENTS.md` or `backend/AGENTS.md` — Express API rules
-- `apps/admin/AGENTS.md` or `frontend/AGENTS.md` — Admin dashboard rules
+- `apps/backend/AGENTS.md` — Express API rules
+- `apps/admin/AGENTS.md` — Admin dashboard rules
 - `apps/storefront/AGENTS.md` — Storefront rules (once created)
 
 > If a sub-AGENTS.md exists for the scope of work, its rules take precedence over this file.
@@ -35,10 +35,7 @@ ecommerce-infra/                 ← YOU ARE HERE
 └── pnpm-workspace.yaml          ← Workspace packages (after Phase 1)
 ```
 
-**Before Phase 1 restructure is complete:**
-- Admin dashboard is at `frontend/` (not `apps/admin/`)
-- Backend is at `backend/` (not `apps/backend/`)
-- No `packages/` directory yet
+**Phase 1 restructure is complete.** All apps are under `apps/`, all shared packages under `packages/`.
 
 ---
 
@@ -47,7 +44,7 @@ ecommerce-infra/                 ← YOU ARE HERE
 | Domain | Target Container | Port | Restriction |
 |--------|-----------------|------|-------------|
 | `infra-pro.com` | `storefront` | 3001 | Public |
-| `app.infra-pro.com` | `admin` / `frontend` | 3000 | VPN/IP restricted |
+| `app.infra-pro.com` | `admin` | 3000 | VPN/IP restricted |
 | `api.infra-pro.com` | `backend` | 4000 | Public (rate limited) |
 
 **Never serve the admin app on a public domain. Never skip nginx for direct container access in production.**
