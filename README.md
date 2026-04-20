@@ -1,256 +1,334 @@
 # InfraPro — E-Commerce Infrastructure Platform
 
-A production-ready, full-stack e-commerce infrastructure platform demonstrating modern architecture patterns, DevOps practices, and scalable design.
+A production-ready, full-stack e-commerce monorepo with a customer storefront, admin dashboard, and Express API — orchestrated with Turborepo and pnpm workspaces.
 
-## Architecture Overview
+## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   infra-pro.com │     │ app.infra-pro   │     │api.infra-pro.com│
-│  (Landing Page) │     │   (Dashboard)   │     │    (Backend)    │
-│   Static HTML   │     │   Next.js 16    │     │  Express + TS   │
-└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-         │                       │                       │
-         └───────────────────────┴───────────────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │         Nginx           │
-                    │  (SSL, Routing, CORS)   │
-                    └────────────┬────────────┘
-                                 │
-         ┌───────────────────────┼───────────────────────┐
-         │                       │                       │
-┌────────▼────────┐    ┌─────────▼──────────┐  ┌─────────▼─────────┐
-│    Frontend     │    │      Backend       │  │      Worker       │
-│   (Next.js)     │    │     (Express)      │  │    (BullMQ)       │
-└─────────────────┘    └─────────┬──────────┘  └───────────────────┘
-                                 │
-                 ┌───────────────┼─────────────┐
-                 │               │             │
-           ┌─────▼─────┐    ┌────▼────┐   ┌────▼────┐
-           │PostgreSQL │    │  Redis  │   │ Grafana │
-           │  (Data)   │    │ (Queue) │   │(Metrics)│
-           └───────────┘    └─────────┘   └─────────┘
+https://infra-pro.com        https://app.infra-pro.com     https://api.infra-pro.com
+  (Customer Storefront)         (Admin Dashboard)               (Backend API)
+      Next.js 16                   Next.js 16                   Express 5 + TS
+          │                             │                              │
+          └─────────────────────────────┴──────────────────────────────┘
+                                        │
+                           ┌────────────▼────────────┐
+                           │          Nginx          │
+                           │  (SSL, Routing, CORS)   │
+                           └────────────┬────────────┘
+                                        │
+             ┌──────────────────────────┼──────────────────────────┐
+             │                          │                          │
+   ┌─────────▼──────────┐   ┌───────────▼──────────┐  ┌───────────▼────────┐
+   │    storefront       │   │       backend         │  │       worker       │
+   │    (port 3001)      │   │     (port 4000)       │  │      (BullMQ)      │
+   └────────────────────┘   └───────────┬──────────┘  └────────────────────┘
+                                         │
+                        ┌────────────────┼────────────┐
+                        │                │            │
+                  ┌─────▼─────┐    ┌─────▼────┐  ┌───▼──────┐
+                  │PostgreSQL │    │  Redis   │  │Prometheus│
+                  │    15     │    │    7     │  │+ Grafana │
+                  └───────────┘    └──────────┘  └──────────┘
+```
+
+## Monorepo Structure
+
+```
+ecommerce-infra/
+├── apps/
+│   ├── admin/               # Next.js 16 admin dashboard (port 3000)
+│   ├── storefront/          # Next.js 16 customer storefront (port 3001)
+│   └── backend/             # Express 5 API (port 4000)
+├── packages/
+│   ├── shared-types/        # TypeScript interfaces (zero runtime deps)
+│   ├── ui/                  # Shared React components
+│   └── api-client/          # Shared Axios factory + ApiError + token helpers
+├── nginx/                   # nginx.conf + SSL certs
+├── monitoring/              # Prometheus + Grafana config
+├── docker-compose.yml
+├── turbo.json               # Turborepo pipeline
+├── pnpm-workspace.yaml      # pnpm workspace config
+└── package.json             # Root scripts (turbo dev/build/test)
 ```
 
 ## Tech Stack
 
-### Frontend
-- **Framework**: Next.js 16 (App Router, React 19)
-- **Styling**: Tailwind CSS 4
-- **Icons**: Lucide React
-- **Charts**: Recharts
-- **Testing**: Vitest + Testing Library + MSW
-
-### Backend
-- **Runtime**: Node.js + Express 5
-- **Language**: TypeScript
-- **ORM**: Sequelize
-- **Database**: PostgreSQL 15
-- **Cache/Queue**: Redis 7 + BullMQ
-- **Auth**: JWT (Access + Refresh tokens), bcrypt
-- **Testing**: Jest + Supertest
-
-### Infrastructure
-- **Reverse Proxy**: Nginx 1.25 (SSL termination, CORS, rate limiting)
-- **Monitoring**: Prometheus + Grafana
-- **Containerization**: Docker + Docker Compose
-- **SSL**: mkcert (local development)
-
-## Project Structure
-
-```
-ecommerce-infra/
-├── backend/              # Express API
-│   ├── src/
-│   │   ├── modules/      # Feature modules (auth, users, products)
-│   │   ├── config/       # Database, Redis, env
-│   │   ├── middlewares/  # Auth, CORS, rate limiting
-│   │   └── utils/        # Error handling, logging
-│   ├── tests/            # Unit & integration tests
-│   └── Dockerfile
-├── frontend/             # Next.js Dashboard
-│   ├── app/              # App Router pages
-│   ├── components/       # UI components
-│   ├── lib/              # API client, contexts
-│   ├── tests/            # Component & page tests
-│   └── Dockerfile
-├── nginx/                # Nginx configuration
-│   ├── nginx.conf        # Main config
-│   ├── conf.d/           # Additional configs
-│   ├── certs/            # SSL certificates
-│   └── landing/          # Static landing page
-├── docker-compose.yml    # Full stack orchestration
-└── README.md
-```
+| Layer | Technology |
+|-------|-----------|
+| Monorepo | Turborepo + pnpm workspaces |
+| Storefront | Next.js 16, React 19, Tailwind CSS 4 |
+| Admin | Next.js 16, React 19, Tailwind CSS 4, Recharts |
+| Backend | Express 5, TypeScript 5, Sequelize 6, PostgreSQL 15 |
+| Cache / Queue | Redis 7 + BullMQ |
+| Auth | JWT (access + refresh) + bcrypt — separate secrets for admin vs customers |
+| Testing | Backend: Jest + Supertest · Frontend: Vitest + RTL + MSW · E2E: Playwright |
+| Proxy | Nginx 1.25 (SSL, CORS, rate limiting, gzip) |
+| Monitoring | Prometheus + Grafana |
+| Containers | Docker + Docker Compose |
 
 ## Quick Start
 
 ### Prerequisites
-- Docker + Docker Compose
-- Node.js 20+ (for local development)
-- mkcert (for local SSL)
 
-### 1. Clone and Setup SSL
+- [Docker](https://docs.docker.com/get-docker/) + Docker Compose
+- [Node.js 20+](https://nodejs.org/)
+- [pnpm](https://pnpm.io/installation): `npm install -g pnpm`
+- [mkcert](https://github.com/FiloSottile/mkcert) (local SSL)
+
+### 1. Clone & Install
+
 ```bash
-git clone <repo>
+git clone https://github.com/HtetOoNaing/ecommerce-infra.git
 cd ecommerce-infra
 
-# Generate SSL certificates
-./nginx/generate-ssl.sh
-
-# Add hosts entries
-sudo echo "127.0.0.1 infra-pro.com app.infra-pro.com api.infra-pro.com" >> /etc/hosts
+# Install all workspace dependencies (always run from repo root)
+pnpm install
 ```
 
-### 2. Start All Services
+> ⚠️ **Never run `npm install` inside a sub-app.** The `workspace:*` protocol requires pnpm run from the root.
+
+### 2. Set Up SSL & Hosts
+
+```bash
+# Generate local SSL certificates
+./nginx/generate-ssl.sh
+
+# Add local domains
+echo "127.0.0.1 infra-pro.com app.infra-pro.com api.infra-pro.com" | sudo tee -a /etc/hosts
+```
+
+### 3. Configure Environment
+
+```bash
+cp apps/backend/.env.example apps/backend/.env
+# Edit .env with your values (see Environment Variables section)
+```
+
+### 4. Start All Services (Docker)
+
 ```bash
 docker compose up -d
 ```
 
-### 3. Access the Application
-| Service | URL | Description |
-|---------|-----|-------------|
-| Landing Page | https://infra-pro.com | Public marketing site |
-| Dashboard | https://app.infra-pro.com | Admin dashboard (login required) |
-| API | https://api.infra-pro.com | Backend API endpoints |
-| Grafana | http://localhost:3001 | Monitoring dashboards |
+| URL | Service |
+|-----|---------|
+| https://infra-pro.com | Customer storefront |
+| https://app.infra-pro.com | Admin dashboard |
+| https://api.infra-pro.com | Backend API |
+| http://localhost:9090 | Prometheus |
+| http://localhost:3001 | Grafana (Docker only — see note below) |
 
-### Default Admin Credentials
-```
-Email: admin@test.com
-Password: Test1234!
-```
+**Default admin credentials:** `admin@test.com` / `Test1234!`
 
-## Development
+## Local Development
 
-### Backend Development
+All apps run in parallel via Turborepo:
+
 ```bash
-cd backend
-cp .env.example .env
-npm install
-npm run dev          # tsx watch
-npm run test         # Jest tests
+# Run all apps simultaneously
+pnpm dev
+
+# Run a single app
+pnpm --filter @infrapro/storefront dev    # http://localhost:3001
+pnpm --filter @infrapro/admin dev         # http://localhost:3000
+pnpm --filter @infrapro/backend dev       # http://localhost:4000
 ```
 
-### Frontend Development
+### Running Tests
+
 ```bash
-cd frontend
-npm install
-npm run dev          # Next.js dev server
-npm run test         # Vitest tests
-npm run test:watch   # Watch mode
+# All workspaces
+pnpm test
+
+# Single workspace
+pnpm --filter @infrapro/backend test
+pnpm --filter @infrapro/admin test
+pnpm --filter @infrapro/storefront test
 ```
 
-## API Endpoints
+### Type Checking
 
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/register` | Create account |
-| POST | `/api/v1/auth/login` | Login, get tokens |
-| POST | `/api/v1/auth/logout` | Invalidate session |
-| POST | `/api/v1/auth/refresh` | Refresh access token |
-| POST | `/api/v1/auth/forgot-password` | Request reset link |
+```bash
+pnpm typecheck
+```
 
-### Users (Admin only)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/users` | List all users |
+## Auth Architecture
 
-### Products (Public read, Admin write)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/products` | List products |
-| GET | `/api/v1/products/:id` | Get single product |
-| POST | `/api/v1/products` | Create product (admin) |
-| PUT | `/api/v1/products/:id` | Update product (admin) |
-| DELETE | `/api/v1/products/:id` | Delete product (admin) |
+Two completely separate auth systems — never mix them:
 
-## Testing Strategy
+| Aspect | Customer (Storefront) | Admin (Dashboard) |
+|--------|----------------------|-------------------|
+| DB table | `customers` | `users` |
+| JWT secrets | `CUSTOMER_JWT_ACCESS_SECRET` / `CUSTOMER_JWT_REFRESH_SECRET` | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` |
+| localStorage keys | `customerAccessToken`, `customerRefreshToken` | `accessToken`, `refreshToken` |
+| API prefix | `/api/v1/customer/auth/*` | `/api/v1/auth/*` |
+| Backend middleware | `customerAuthenticate` | `authenticate` |
 
-### Frontend Tests (Vitest)
-- **Unit Tests**: UI components (Button, Input, Badge, etc.)
-- **Integration Tests**: Pages (Login, Products, Dashboard)
-- **API Mocking**: MSW for backend API simulation
-- **Location**: `frontend/tests/`
+## API Reference
 
-Run: `npm test`
+### Admin Auth — `/api/v1/auth`
 
-### Backend Tests (Jest)
-- **Unit Tests**: Services, repositories, utilities
-- **Integration Tests**: API endpoints with test database
-- **Location**: `backend/tests/`
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/register` | — | Create admin account |
+| POST | `/login` | — | Login, receive tokens |
+| POST | `/logout` | ✓ | Invalidate session |
+| POST | `/refresh` | — | Rotate access token |
+| POST | `/forgot-password` | — | Request reset email |
+| POST | `/reset-password` | — | Set new password |
 
-Run: `npm test`
+### Customer Auth — `/api/v1/customer/auth`
 
-## Key Features
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/register` | — | Create customer account |
+| POST | `/login` | — | Login, receive tokens |
+| POST | `/logout` | ✓ | Invalidate session |
+| POST | `/refresh` | — | Rotate access token |
+| POST | `/forgot-password` | — | Request reset email |
+| POST | `/reset-password` | — | Set new password |
 
-### Security
-- JWT-based authentication with refresh token rotation
-- Password hashing with bcrypt
-- Rate limiting on auth endpoints
-- CORS properly configured
-- SQL injection protection (Sequelize ORM)
-- Helmet security headers
+### Products — `/api/v1/products`
 
-### Architecture Patterns
-- **Layered Architecture**: Routes → Controller → Service → Repository → Model
-- **Feature Modules**: Auth, Users, Products each self-contained
-- **API Versioning**: `/api/v1/` prefix for backward compatibility
-- **Subdomain Separation**: Clear separation of concerns
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/` | — | List products (paginated, filterable) |
+| GET | `/:id` | — | Get single product |
+| POST | `/` | Admin | Create product |
+| PUT | `/:id` | Admin | Update product |
+| DELETE | `/:id` | Admin | Delete product |
 
-### DevOps
-- Docker multi-stage builds (optimized images)
-- Health checks for all services
-- Centralized logging
-- Prometheus metrics collection
-- Nginx caching and compression
+### Categories — `/api/v1/categories`
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/` | — | List categories |
+| GET | `/:id` | — | Get category |
+| POST | `/` | Admin | Create category |
+| PUT | `/:id` | Admin | Update category |
+| DELETE | `/:id` | Admin | Delete category |
+
+### Orders — `/api/v1/orders`
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/` | Customer | Create order |
+| GET | `/customer/orders` | Customer | List own orders |
+| GET | `/customer/orders/:id` | Customer | Get own order |
+| GET | `/` | Admin | List all orders |
+| PUT | `/:id/status` | Admin | Update order status |
+
+## Shared Packages
+
+### `@infrapro/shared-types`
+
+TypeScript interfaces only — zero runtime dependencies. Shared across all apps.
+
+```typescript
+import type { Product, Customer, Order, PaginatedResponse } from "@infrapro/shared-types";
+```
+
+### `@infrapro/api-client`
+
+Exports a `createApiClient(config)` factory returning a configured Axios instance with request/response interceptors, 401 refresh token queue, and `axios-retry` on 5xx/network errors only.
+
+```typescript
+import { createApiClient, ApiError } from "@infrapro/api-client";
+```
+
+### `@infrapro/ui`
+
+Shared React components (Button, Input, Badge, etc.) usable in both admin and storefront.
+
+```typescript
+import { Button, Badge } from "@infrapro/ui";
+```
 
 ## Environment Variables
 
-### Backend (.env)
+### `apps/backend/.env`
+
 ```env
 NODE_ENV=development
 PORT=4000
+
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=ecommerce
+
 REDIS_URL=redis://localhost:6379
-JWT_SECRET=your-secret-key
-JWT_REFRESH_SECRET=your-refresh-secret
+
+# Admin JWT
+JWT_ACCESS_SECRET=your-admin-access-secret
+JWT_REFRESH_SECRET=your-admin-refresh-secret
+ACCESS_TOKEN_EXPIRES=15m
+REFRESH_TOKEN_EXPIRES=7d
+
+# Customer JWT (separate secrets — never reuse admin secrets)
+CUSTOMER_JWT_ACCESS_SECRET=your-customer-access-secret
+CUSTOMER_JWT_REFRESH_SECRET=your-customer-refresh-secret
+CUSTOMER_ACCESS_TOKEN_EXPIRES=15m
+CUSTOMER_REFRESH_TOKEN_EXPIRES=7d
+
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your-email
+SMTP_PASS=your-password
 ```
 
-### Frontend (.env.local)
+### `apps/admin/.env.local`
+
 ```env
 NEXT_PUBLIC_API_URL=https://api.infra-pro.com
 ```
 
+### `apps/storefront/.env.local`
+
+```env
+NEXT_PUBLIC_API_URL=https://api.infra-pro.com
+NEXT_PUBLIC_SITE_URL=https://infra-pro.com
+```
+
 ## Monitoring
 
-- **Prometheus**: Scrapes metrics at `/metrics` endpoint
-- **Grafana**: Pre-configured dashboards at http://localhost:3001
-- **Metrics**: HTTP requests, response times, error rates
+- **Prometheus**: scrapes `/metrics` on the backend every 15s
+- **Grafana**: pre-configured dashboards — `http://localhost:3001` (Docker)
+- **Metrics collected**: HTTP request rate, response times, error rates
 
 ## Troubleshooting
 
+### `npm install` fails with `workspace:*` error
+
+Use `pnpm install` from the **repo root** — not `npm install` inside a sub-app.
+
 ### Containers won't start
+
 ```bash
 docker compose down -v
 docker compose up -d --build
 ```
 
-### Database connection issues
+### Database connection errors
+
 ```bash
 docker compose logs postgres
-# Check env vars match docker-compose settings
+# Verify .env DB_* vars match docker-compose.yml defaults
 ```
 
 ### CORS errors
-- Verify `api.infra-pro.com` CORS config in `nginx/nginx.conf`
-- Check frontend `.env` has correct API URL
+
+- Check `nginx/nginx.conf` for the correct `$cors_origin` mapping
+- Confirm `NEXT_PUBLIC_API_URL` in `.env.local` has no trailing slash
+
+### Port 3001 conflict (Grafana vs storefront)
+
+Grafana (Docker) and the storefront dev server both bind to port 3001. Don't run both simultaneously, or change the storefront dev port in `apps/storefront/package.json`:
+
+```json
+"dev": "next dev -p 3002"
+```
 
 ## License
 
