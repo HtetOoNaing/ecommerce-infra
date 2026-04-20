@@ -2,9 +2,7 @@ import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "@/config/db";
 import { User } from "@/modules/user/user.model";
 import { Product } from "@/modules/product/product.model";
-
-export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+import { OrderStatus, PaymentStatus } from "./order.types";
 
 interface OrderAttributes {
   id: number;
