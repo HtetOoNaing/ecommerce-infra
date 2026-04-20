@@ -116,7 +116,7 @@ docker compose up -d
 | https://app.infra-pro.com | Admin dashboard |
 | https://api.infra-pro.com | Backend API |
 | http://localhost:9090 | Prometheus |
-| http://localhost:3001 | Grafana (Docker only — see note below) |
+| http://localhost:3030 | Grafana (Docker only) |
 
 **Default admin credentials:** `admin@test.com` / `Test1234!`
 
@@ -294,7 +294,7 @@ NEXT_PUBLIC_SITE_URL=https://infra-pro.com
 ## Monitoring
 
 - **Prometheus**: scrapes `/metrics` on the backend every 15s
-- **Grafana**: pre-configured dashboards — `http://localhost:3001` (Docker)
+- **Grafana**: pre-configured dashboards — `http://localhost:3030` (Docker)
 - **Metrics collected**: HTTP request rate, response times, error rates
 
 ## Troubleshooting
@@ -322,13 +322,9 @@ docker compose logs postgres
 - Check `nginx/nginx.conf` for the correct `$cors_origin` mapping
 - Confirm `NEXT_PUBLIC_API_URL` in `.env.local` has no trailing slash
 
-### Port 3001 conflict (Grafana vs storefront)
+### Grafana credentials
 
-Grafana (Docker) and the storefront dev server both bind to port 3001. Don't run both simultaneously, or change the storefront dev port in `apps/storefront/package.json`:
-
-```json
-"dev": "next dev -p 3002"
-```
+Default login at `http://localhost:3030`: `admin` / `admin`
 
 ## License
 
