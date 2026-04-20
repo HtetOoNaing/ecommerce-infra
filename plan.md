@@ -89,21 +89,21 @@ ecommerce-infra/
   - [x] `PUT /customer/profile`
   - [x] `GET /customer/addresses`
   - [x] `POST /customer/addresses`
-- [ ] Update `Order` to reference `customers.id` (or keep `userId` flexible — see note)
-- [ ] Add unit + integration tests for all new modules
-- [ ] Update `backend/AGENTS.md`
+- [x] Update `Order` to reference `customers.id` (or keep `userId` flexible — see note)
+- [x] Add unit + integration tests for all new modules
+- [x] Update `backend/AGENTS.md`
 
 > **Note on Orders:** Keep `orders.userId` pointing to `customers.id` for storefront orders. Admin-created orders can reference `admin_users.id` with a `createdByAdminId` field.
 
-### Phase 3 — Storefront App
+### Phase 3 — Storefront App [IN PROGRESS]
 > Goal: customer-facing Next.js app with full shopping journey
 
 **Scaffold:**
-- [ ] Create `apps/storefront/` (Next.js 16, TypeScript, Tailwind CSS 4)
-- [ ] Set up `@infrapro/shared-types`, `@infrapro/ui`, `@infrapro/api-client` imports
+- [x] Create `apps/storefront/` (Next.js 16, TypeScript, Tailwind CSS 4)
+- [x] Set up `@infrapro/shared-types`, `@infrapro/ui`, `@infrapro/api-client` imports
 - [ ] Create `storefront/AGENTS.md`
-- [ ] Add `storefront` service to `docker-compose.yml`
-- [ ] Update `nginx.conf` — route `infra-pro.com` → storefront, IP-restrict admin
+- [x] Add `storefront` service to `docker-compose.yml`
+- [x] Update `nginx.conf` — route `infra-pro.com` → storefront, IP-restrict admin
 
 **Pages:**
 - [ ] Homepage (`/`) — hero banner, featured products, categories
