@@ -114,6 +114,59 @@ export const UpdateProductSchema = z.object({
   categoryId: z.number().nullable().optional(),
 });
 
+// ─── Order Schemas ──────────────────────────────────
+export const OrderItemSchema = z.object({
+  id: z.number(),
+  productId: z.number(),
+  quantity: z.number().int().min(1),
+  unitPrice: z.number(),
+  product: z.object({
+    id: z.number(),
+    name: z.string(),
+    sku: z.string(),
+  }).optional(),
+});
+
+export const OrderSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]),
+  paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]),
+  totalAmount: z.number(),
+  shippingAddress: z.string(),
+  billingAddress: z.string().nullable(),
+  notes: z.string().nullable(),
+  items: z.array(OrderItemSchema),
+  user: z.object({
+    id: z.number(),
+    email: z.string().email(),
+    name: z.string().nullable().optional(),
+  }).optional(),
+  createdAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime().optional(),
+});
+
+export const OrdersListSchema = createPaginatedResponseSchema(OrderSchema);
+
+export const CreateOrderSchema = z.object({
+  userId: z.number().int().positive(),
+  items: z.array(z.object({
+    productId: z.number().int().positive(),
+    quantity: z.number().int().min(1),
+  })).min(1),
+  shippingAddress: z.string().min(1).max(500),
+  billingAddress: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export const UpdateOrderSchema = z.object({
+  status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]).optional(),
+  paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]).optional(),
+  shippingAddress: z.string().min(1).max(500).optional(),
+  billingAddress: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+});
+
 // ─── API Error Schema ────────────────────────────────
 export const ApiErrorSchema = z.object({
   message: z.string(),

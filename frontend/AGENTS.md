@@ -50,6 +50,7 @@ lib/api/
 ├── users.ts      # getUsers(page?, limit?) → PaginatedResponse<User>
 ├── products.ts   # getProducts(page?, limit?), getProduct, createProduct, updateProduct, deleteProduct
 ├── categories.ts # getCategories, getCategory, getCategoryBySlug, createCategory, updateCategory, deleteCategory
+├── orders.ts     # getOrders, getOrder, getOrdersByUser, createOrder, updateOrder, deleteOrder
 └── index.ts      # Barrel exports (always import from here)
 ```
 
@@ -211,7 +212,8 @@ frontend/
 │   │   ├── layout.tsx          # Auth guard + Sidebar wrapper
 │   │   ├── page.tsx            # Dashboard overview (charts, stats)
 │   │   ├── products/page.tsx   # Product management
-│   │   └── users/page.tsx      # User management
+│   │   ├── users/page.tsx      # User management
+│   │   └── orders/page.tsx     # Order management
 │   ├── globals.css             # Global CSS (Tailwind base + custom animations)
 │   ├── layout.tsx              # Root layout (AuthProvider + ToastProvider)
 │   └── page.tsx                # Root redirect
@@ -239,6 +241,8 @@ frontend/
 │   │   ├── auth.ts             # login, register, logout, forgotPassword, resetPassword
 │   │   ├── users.ts            # getUsers
 │   │   ├── products.ts         # getProducts, getProduct, createProduct, updateProduct, deleteProduct
+│   │   ├── categories.ts       # getCategories, getCategory, createCategory, updateCategory, deleteCategory
+│   │   ├── orders.ts           # getOrders, getOrder, getOrdersByUser, createOrder, updateOrder, deleteOrder
 │   │   └── index.ts            # Barrel — always import from here
 │   ├── types.ts                # Shared TypeScript interfaces
 │   ├── validators.ts           # Zod schemas for API contract validation
@@ -272,6 +276,12 @@ UpdateCategoryDto // all fields optional
 Product       // { id, name, description?, price, stock, sku, isActive, createdBy, categoryId?, category?, createdAt, updatedAt }
 CreateProductDto  // { name, description?, price, stock, sku, categoryId? }
 UpdateProductDto  // all fields optional, categoryId can be null to remove
+Order         // { id, userId, status, paymentStatus, totalAmount, shippingAddress, billingAddress?, notes?, items, user?, createdAt, updatedAt }
+OrderItem     // { id, productId, quantity, unitPrice, product? }
+OrderStatus   // "pending" | "processing" | "shipped" | "delivered" | "cancelled"
+PaymentStatus // "pending" | "paid" | "failed" | "refunded"
+CreateOrderDto    // { userId, items[], shippingAddress, billingAddress?, notes? }
+UpdateOrderDto    // { status?, paymentStatus?, shippingAddress?, billingAddress?, notes? }
 DashboardStats    // { totalUsers, totalProducts, activeProducts, verifiedUsers }
 
 PaginatedResponse<T> // { data: T[], total, page, limit, totalPages }

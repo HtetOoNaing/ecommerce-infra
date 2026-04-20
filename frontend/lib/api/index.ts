@@ -29,6 +29,16 @@ export {
   deleteCategory,
 } from "./categories";
 
+// ─── Orders API ────────────────────────────────────
+export {
+  getOrders,
+  getOrder,
+  getOrdersByUser,
+  createOrder,
+  updateOrder,
+  deleteOrder,
+} from "./orders";
+
 // ─── Client utilities ────────────────────────────────
 export {
   ApiError,
