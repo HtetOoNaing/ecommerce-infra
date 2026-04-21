@@ -110,6 +110,14 @@ cp apps/backend/.env.example apps/backend/.env
 docker compose up -d
 ```
 
+### 5. Run Database Migrations (Initial Setup Only)
+
+Run migrations once on initial setup or when deploying to a new environment. Migrations persist in Docker volumes, so this step is not needed on subsequent restarts:
+
+```bash
+docker compose exec backend npx sequelize-cli db:migrate
+```
+
 | URL | Service |
 |-----|---------|
 | https://infra-pro.com | Customer storefront |
