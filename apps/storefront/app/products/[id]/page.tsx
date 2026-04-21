@@ -18,11 +18,39 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
+  const BASE_URL = "https://infra-pro.com";
+
   try {
     const product = await getProduct(parseInt(id));
+    const productUrl = `${BASE_URL}/products/${product.id}`;
+
     return {
       title: `${product.name} | InfraPro Store`,
-      description: product.description,
+      description: product.description ?? undefined,
+      alternates: {
+        canonical: productUrl,
+      },
+      openGraph: {
+        title: product.name,
+        description: product.description ?? undefined,
+        url: productUrl,
+        siteName: "InfraPro Store",
+        type: "website",
+        images: [
+          {
+            url: product.images?.[0]?.url || `${BASE_URL}/og-default.jpg`,
+            width: 1200,
+            height: 630,
+            alt: product.name,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: product.name,
+        description: product.description ?? undefined,
+        images: [product.images?.[0]?.url || `${BASE_URL}/og-default.jpg`],
+      },
     };
   } catch {
     return {

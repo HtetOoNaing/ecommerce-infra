@@ -4,6 +4,14 @@ export interface CategoryInfo {
   slug: string;
 }
 
+export interface ProductImage {
+  id: number;
+  url: string;
+  alt?: string | null;
+  isPrimary: boolean;
+  sortOrder: number;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -15,6 +23,7 @@ export interface Product {
   createdBy: number;
   categoryId?: number | null;
   category?: CategoryInfo | null;
+  images?: ProductImage[];
   createdAt: string;
   updatedAt: string;
 }
