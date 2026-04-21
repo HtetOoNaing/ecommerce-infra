@@ -12,13 +12,17 @@ import {
   WebhookItem,
 } from "./checkout.types";
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+// Stripe is Phase 4 - only initialize if key is present
+const stripe = env.STRIPE_SECRET_KEY ? new Stripe(env.STRIPE_SECRET_KEY) : null;
 
 export class CheckoutService {
   async createPaymentIntent(
     customerId: number,
     dto: CreateCheckoutDto
   ): Promise<CheckoutSessionResponse> {
+    if (!stripe) {
+      throw AppError.internal("Stripe is not configured");
+    }
     let totalAmount = 0;
     const validatedItems: WebhookItem[] = [];
 
@@ -60,13 +64,16 @@ export class CheckoutService {
   }
 
   async handleWebhookEvent(payload: Buffer, signature: string): Promise<void> {
+    if (!stripe) {
+      throw AppError.internal("Stripe is not configured");
+    }
     let event: Stripe.Event;
 
     try {
       event = stripe.webhooks.constructEvent(
         payload,
         signature,
-        env.STRIPE_WEBHOOK_SECRET
+        env.STRIPE_WEBHOOK_SECRET || ""
       );
     } catch {
       throw AppError.badRequest("Invalid Stripe webhook signature");
