@@ -4,6 +4,12 @@ import { getProduct } from "@/lib/api/products";
 import { AddToCartButton } from "./AddToCartButton";
 import type { Metadata } from "next";
 
+// ISR: Revalidate product pages every 60 seconds
+export const revalidate = 60;
+
+// Allow on-demand generation for product IDs not in generateStaticParams
+export const dynamicParams = true;
+
 interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
