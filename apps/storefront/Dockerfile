@@ -1,52 +1,46 @@
-# syntax=docker/dockerfile:1
-
+# Build context: monorepo root (.)
+# -----------------------------
 # Build stage
-FROM node:18-alpine AS builder
-RUN npm install -g pnpm@8
+# -----------------------------
+FROM node:20-alpine AS builder
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-# Copy workspace configuration
-COPY pnpm-workspace.yaml package.json ./
-COPY apps/storefront/package.json ./apps/storefront/
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/api-client/package.json ./packages/api-client/
+COPY apps/storefront/package.json ./apps/storefront/
 
-# Install all dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source files
-COPY apps/storefront/ ./apps/storefront/
-COPY packages/shared-types/ ./packages/shared-types/
-COPY packages/ui/ ./packages/ui/
-COPY packages/api-client/ ./packages/api-client/
+COPY . .
 
-# Build packages first
-RUN pnpm --filter @infrapro/shared-types build || true
-RUN pnpm --filter @infrapro/ui build || true
-RUN pnpm --filter @infrapro/api-client build || true
-
-# Build the storefront app
-WORKDIR /app/apps/storefront
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm build
+RUN pnpm --filter @infrapro/storefront build
 
+# -----------------------------
 # Production stage
-FROM node:18-alpine AS runner
-RUN npm install -g pnpm@8
+# -----------------------------
+FROM node:20-alpine AS production
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3001
-
-# Copy necessary files
 COPY --from=builder /app/apps/storefront/.next/standalone ./
-COPY --from=builder /app/apps/storefront/.next/static ./.next/static
-COPY --from=builder /app/apps/storefront/public ./public
+COPY --from=builder /app/apps/storefront/.next/static ./apps/storefront/.next/static
+COPY --from=builder /app/apps/storefront/public ./apps/storefront/public
+
+RUN chown -R appuser:appgroup /app
+
+USER appuser
 
 EXPOSE 3001
 
-CMD ["node", "server.js"]
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3001
+ENV NODE_ENV=production
+
+CMD ["node", "apps/storefront/server.js"]
