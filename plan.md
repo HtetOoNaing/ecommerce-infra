@@ -155,13 +155,13 @@ ecommerce-infra/
 - [x] Stricter rate limits on admin auth (3 attempts / 15min)
 - [x] Admin session expiry shorter (15m access / 1h refresh)
 
-### Phase 6 — Storefront Performance & SEO
-- [ ] ISR on product pages (`revalidate: 60`)
-- [ ] Server Components for product listing
-- [ ] `sitemap.xml` generation
-- [ ] `robots.txt`
-- [ ] Open Graph meta tags on product pages
-- [ ] Lighthouse CI target: performance > 90
+### Phase 6 — Storefront Performance & SEO ✅ COMPLETE
+- [x] ISR on product pages (`revalidate: 60`)
+- [x] Server Components for product listing
+- [x] `sitemap.xml` generation
+- [x] `robots.txt`
+- [x] Open Graph meta tags on product pages
+- [x] Lighthouse CI target: performance > 90
 
 ---
 

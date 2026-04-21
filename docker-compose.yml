@@ -133,7 +133,7 @@ services:
       context: .
       dockerfile: apps/backend/Dockerfile
       target: production
-    command: npm run worker:production
+    command: node dist/worker.js
     container_name: ecommerce_worker
     restart: unless-stopped
     depends_on:
@@ -211,6 +211,8 @@ services:
       backend:
         condition: service_healthy
       admin:
+        condition: service_healthy
+      storefront:
         condition: service_healthy
     logging: *logging-defaults
 

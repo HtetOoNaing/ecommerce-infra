@@ -1,0 +1,36 @@
+# Node modules (installed inside container)
+**/node_modules
+**/.next
+**/.turbo
+
+# Build output
+**/dist
+**/build
+
+# Logs
+**/logs
+**/*.log
+
+# Environment files (injected via docker-compose env_file)
+**/.env
+**/.env.local
+**/.env.development
+!**/.env.production
+!**/.env.example
+
+# OS / Editor
+.DS_Store
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Monitoring data (volumes, not build context)
+monitoring/grafana/data
+monitoring/prometheus/data
+
+# Test files
+**/coverage
+**/.nyc_output
