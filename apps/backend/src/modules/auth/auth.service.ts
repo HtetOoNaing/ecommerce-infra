@@ -12,6 +12,7 @@ import { hashPassword, comparePassword } from "@/utils/hash";
 import { addEmailJob } from "@/jobs/producers/email.producer";
 import { logger } from "@/config/logger";
 import { AppError } from "@/utils/appError";
+import { authenticator } from "otplib";
 
 const userService = new UserService();
 
@@ -77,6 +78,14 @@ export class AuthService {
     const isValid = await comparePassword(data.password, user.password);
 
     if (!isValid) throw AppError.unauthorized("Invalid credentials");
+
+    if (user.isMfaEnabled) {
+      if (!data.totpToken) {
+        return { mfaRequired: true };
+      }
+      const validTotp = authenticator.check(data.totpToken, user.totpSecret!);
+      if (!validTotp) throw AppError.unauthorized("Invalid MFA token");
+    }
 
     const payload = {
       id: user.id,

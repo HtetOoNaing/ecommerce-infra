@@ -10,6 +10,8 @@ export interface UserEntity {
   verificationToken?: string | null;
   resetPasswordToken?: string | null;
   resetPasswordExpires?: Date | null;
+  totpSecret?: string | null;
+  isMfaEnabled?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

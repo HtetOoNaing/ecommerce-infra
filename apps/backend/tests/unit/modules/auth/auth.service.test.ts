@@ -42,6 +42,7 @@ const verifyRefreshToken = jwt.verifyRefreshToken as jest.MockedFunction<typeof 
 const generateToken = tokenUtils.generateToken as jest.MockedFunction<typeof tokenUtils.generateToken>;
 const hashToken = tokenUtils.hashToken as jest.MockedFunction<typeof tokenUtils.hashToken>;
 const hashPassword = hashUtils.hashPassword as jest.MockedFunction<typeof hashUtils.hashPassword>;
+const comparePassword = hashUtils.comparePassword as jest.MockedFunction<typeof hashUtils.comparePassword>;
 const addEmailJob = emailProducer.addEmailJob as jest.MockedFunction<typeof emailProducer.addEmailJob>;
 
 describe("AuthService", () => {
@@ -55,6 +56,8 @@ describe("AuthService", () => {
     setRefreshToken.mockResolvedValue(undefined as any);
     generateToken.mockReturnValue("raw-verify-token");
     hashToken.mockReturnValue("hashed-verify-token");
+    hashPassword.mockResolvedValue("hashed-pw");
+    comparePassword.mockResolvedValue(true);
     addEmailJob.mockResolvedValue(undefined as any);
   });
 
@@ -108,7 +111,7 @@ describe("AuthService", () => {
       });
 
       expect(result.accessToken).toBe("access-token");
-      expect(result.user.email).toBe("test@test.com");
+      expect(result.user!.email).toBe("test@test.com");
     });
 
     it("should throw for invalid email", async () => {
@@ -133,7 +136,7 @@ describe("AuthService", () => {
       mockFindByEmail.mockResolvedValue({
         id: 1, email: "test@test.com", password: "hashed", isVerified: true, role: "user",
       });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      comparePassword.mockResolvedValue(false);
 
       await expect(
         service.login({ email: "test@test.com", password: "wrong" })
@@ -204,7 +207,7 @@ describe("AuthService", () => {
     it("should throw for invalid token", async () => {
       mockFindByVerificationToken.mockResolvedValue(null);
 
-      await expect(service.verifyEmail("bad-token")).rejects.toThrow("Invalid token");
+      await expect(service.verifyEmail("bad-token")).rejects.toThrow("Invalid verification token");
     });
   });
 
@@ -259,7 +262,7 @@ describe("AuthService", () => {
 
       await expect(
         service.resetPassword("bad-token", "newPass")
-      ).rejects.toThrow("Invalid or expired token");
+      ).rejects.toThrow("Invalid or expired reset token");
     });
   });
 });

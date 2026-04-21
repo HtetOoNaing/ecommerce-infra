@@ -4,12 +4,17 @@ import { OrderService } from "@/modules/order/order.service";
 import { AppError } from "@/utils/appError";
 import { OrderStatus, PaymentStatus } from "@/modules/order/order.types";
 
-// Mock the service
+// Mock the service — Jest replaces the class; prototype methods work for all instances
 jest.mock("@/modules/order/order.service");
+
+// Access the mocked class prototype (affects the module-level instance in order.controller.ts)
+const serviceMock = jest.mocked(OrderService).prototype as jest.Mocked<OrderService>;
 
 const mockOrder = {
   id: 1,
   userId: 1,
+  customerId: null,
+  stripePaymentIntentId: null,
   status: "pending" as OrderStatus,
   paymentStatus: "pending" as PaymentStatus,
   totalAmount: 59.98,
@@ -32,13 +37,13 @@ const mockOrder = {
 
 describe("OrderController", () => {
   let controller: OrderController;
-  let serviceMock: jest.Mocked<OrderService>;
   let req: Partial<Request>;
   let res: Partial<Response>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    // Each test creates a fresh controller; the module-level service is reused
     controller = new OrderController();
-    serviceMock = (controller as any).service as jest.Mocked<OrderService>;
 
     req = {
       params: {},

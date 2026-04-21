@@ -133,6 +133,8 @@ export class OrderRepository {
     return {
       id: plain.id,
       userId: plain.userId,
+      customerId: plain.customerId,
+      stripePaymentIntentId: plain.stripePaymentIntentId,
       status: plain.status,
       paymentStatus: plain.paymentStatus,
       totalAmount: parseFloat(String(plain.totalAmount)),

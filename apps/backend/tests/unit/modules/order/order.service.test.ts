@@ -40,6 +40,8 @@ const mockProduct: ProductEntity = {
 const mockOrder: OrderEntity = {
   id: 1,
   userId: 1,
+  customerId: null,
+  stripePaymentIntentId: null,
   status: "pending" as OrderStatus,
   paymentStatus: "pending" as PaymentStatus,
   totalAmount: 59.98,

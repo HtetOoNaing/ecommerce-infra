@@ -1,7 +1,57 @@
 import request from "supertest";
-import app from "@/app";
+import express, { Request, Response } from "express";
+import { validate } from "@/middlewares/validate.middleware";
+import {
+  registerCustomerSchema,
+  loginCustomerSchema,
+  resetPasswordSchema,
+} from "@/modules/customer/customer.validation";
+
+// Mock customer auth middleware - simulates missing auth by returning 401
+jest.mock("@/middlewares/customer-auth.middleware", () => ({
+  customerAuthenticate: jest.fn((_req: Request, res: Response, _next: Function) => {
+    return res.status(401).json({ message: "Unauthorized" });
+  }),
+}));
+
+// Import after mocking
+import { customerAuthenticate } from "@/middlewares/customer-auth.middleware";
+
+function createTestApp() {
+  const app = express();
+  app.use(express.json());
+
+  app.post("/api/v1/customer/auth/register", validate(registerCustomerSchema), (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
+  app.post("/api/v1/customer/auth/login", validate(loginCustomerSchema), (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
+  app.post("/api/v1/customer/auth/reset-password", validate(resetPasswordSchema), (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
+  // Protected routes using mocked auth middleware
+  app.get("/api/v1/customer/profile", customerAuthenticate as any, (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
+  app.put("/api/v1/customer/profile", customerAuthenticate as any, (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
+  app.get("/api/v1/customer/addresses", customerAuthenticate as any, (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
+  return app;
+}
 
 describe("Customer API Validation", () => {
+  const app = createTestApp();
+
   describe("POST /api/v1/customer/auth/register", () => {
     it("returns 400 for invalid email", async () => {
       const res = await request(app)

@@ -15,6 +15,7 @@ const mockProduct: ProductEntity = {
   sku: "WDG-001",
   isActive: true,
   createdBy: 1,
+  categoryId: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -78,32 +79,32 @@ describe("ProductService", () => {
 
   describe("getAll", () => {
     it("should return all products as DTOs", async () => {
-      repoMock.findAll.mockResolvedValue([mockProduct]);
+      repoMock.findAll.mockResolvedValue({ data: [mockProduct], total: 1, page: 1, limit: 10, totalPages: 1 });
 
-      const result = await service.getAll();
+      const result = await service.getAll({ page: 1, limit: 10 });
 
-      expect(result).toHaveLength(1);
-      expect(result[0].sku).toBe("WDG-001");
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].sku).toBe("WDG-001");
     });
 
     it("should return empty array when no products", async () => {
-      repoMock.findAll.mockResolvedValue([]);
+      repoMock.findAll.mockResolvedValue({ data: [], total: 0, page: 1, limit: 10, totalPages: 0 });
 
-      const result = await service.getAll();
-      expect(result).toEqual([]);
+      const result = await service.getAll({ page: 1, limit: 10 });
+      expect(result.data).toEqual([]);
     });
   });
 
   describe("getById", () => {
     it("should return product DTO when found", async () => {
-      repoMock.findById.mockResolvedValue(mockProduct);
+      repoMock.findByIdWithCategory.mockResolvedValue(mockProduct);
 
       const result = await service.getById(1);
       expect(result.id).toBe(1);
     });
 
     it("should throw 404 when not found", async () => {
-      repoMock.findById.mockResolvedValue(null);
+      repoMock.findByIdWithCategory.mockResolvedValue(null);
 
       await expect(service.getById(999)).rejects.toThrow(AppError);
 

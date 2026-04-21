@@ -11,6 +11,8 @@ interface UserAttributes {
   verificationToken?: string | null;
   resetPasswordToken?: string | null;
   resetPasswordExpires?: Date | null;
+  totpSecret?: string | null;
+  isMfaEnabled?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -30,6 +32,8 @@ export class User
   public verificationToken?: string | null;
   public resetPasswordToken?: string | null;
   public resetPasswordExpires?: Date | null;
+  public totpSecret?: string | null;
+  public isMfaEnabled!: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -78,6 +82,15 @@ User.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    totpSecret: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+    },
+    isMfaEnabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,
@@ -90,7 +103,7 @@ User.init(
 User.prototype.toJSON = function () {
   const values = this.get();
 
-  const { password, ...rest } = values;
+  const { password, totpSecret, ...rest } = values;
 
   return rest;
 };

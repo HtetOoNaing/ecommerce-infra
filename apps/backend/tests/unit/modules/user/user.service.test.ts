@@ -62,19 +62,19 @@ describe("UserService", () => {
 
   describe("getUsers", () => {
     it("should return array of user DTOs", async () => {
-      repoMock.findAll.mockResolvedValue([mockUser]);
+      repoMock.findAll.mockResolvedValue({ data: [mockUser], total: 1, page: 1, limit: 10, totalPages: 1 });
 
-      const result = await service.getUsers();
+      const result = await service.getUsers({ page: 1, limit: 10 });
 
-      expect(result).toHaveLength(1);
-      expect(result[0].email).toBe("alice@test.com");
-      expect((result[0] as any).password).toBeUndefined();
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].email).toBe("alice@test.com");
+      expect((result.data[0] as any).password).toBeUndefined();
     });
 
     it("should return empty array when no users", async () => {
-      repoMock.findAll.mockResolvedValue([]);
-      const result = await service.getUsers();
-      expect(result).toEqual([]);
+      repoMock.findAll.mockResolvedValue({ data: [], total: 0, page: 1, limit: 10, totalPages: 0 });
+      const result = await service.getUsers({ page: 1, limit: 10 });
+      expect(result.data).toEqual([]);
     });
   });
 

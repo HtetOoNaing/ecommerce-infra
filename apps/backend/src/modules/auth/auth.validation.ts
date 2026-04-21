@@ -13,6 +13,11 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
+  totpToken: z
+    .string()
+    .length(6)
+    .regex(/^\d{6}$/)
+    .optional(),
 });
 
 export const refreshSchema = z.object({

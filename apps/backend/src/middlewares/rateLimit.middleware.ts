@@ -25,3 +25,19 @@ export const authRateLimiter = rateLimit({
     message: "Too many attempts. Try again later.",
   },
 });
+
+export const adminAuthRateLimiter = rateLimit({
+  store: new RedisStore({
+    prefix: "rl:admin:auth:",
+    sendCommand: (...args: string[]) => redis.call(args[0], ...args.slice(1)) as Promise<any>,
+  }),
+
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+
+  keyGenerator: undefined,
+
+  message: {
+    message: "Too many admin login attempts. Try again in 15 minutes.",
+  },
+});

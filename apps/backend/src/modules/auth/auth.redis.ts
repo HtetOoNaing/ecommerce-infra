@@ -1,13 +1,13 @@
 import { redisService } from "@/services/redis.service";
-import { days } from "@/utils/time";
+import { hours } from "@/utils/time";
 
-const REFRESH_PREFIX = "refresh_token";
+const REFRESH_PREFIX = "admin:session";
 
 export const setRefreshToken = (userId: number, sessionId: string, token: string) => {
   return redisService.set(
     `${REFRESH_PREFIX}:${userId}:${sessionId}`,
     token,
-    days(7)
+    hours(1)
   );
 };
 
@@ -19,7 +19,7 @@ export const deleteRefreshToken = (userId: number, sessionId: string) => {
   return redisService.delete(`${REFRESH_PREFIX}:${userId}:${sessionId}`);
 };
 
-export const logoutAll =  async (userId: number) => {
+export const logoutAll = async (userId: number) => {
   const keys = await redisService.getKeys(`${REFRESH_PREFIX}:${userId}:*`);
 
   if (keys.length > 0) {

@@ -8,6 +8,7 @@ import orderRoutes from "@/modules/order/order.routes";
 import healthRoutes from "@/modules/health/health.routes";
 import customerRoutes from "@/modules/customer/customer.routes";
 import { checkoutRouter, webhookRouter } from "@/modules/checkout/checkout.routes";
+import totpRoutes from "@/modules/totp/totp.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { connectDB } from "./config/db";
 import { corsOptions } from "./middlewares/cors.middleware";
@@ -15,6 +16,7 @@ import { globalRateLimiter } from "./middlewares/rateLimit.middleware";
 import { requestIdMiddleware } from "./middlewares/requestId.middleware";
 import { requestLogger } from "./middlewares/logger.middleware";
 import { metricsMiddleware } from "./middlewares/metrics.middleware";
+import { auditLog } from "./middlewares/auditLog.middleware";
 import { register } from "@/modules/metrics/metrics.service";
 
 const app = express();
@@ -36,6 +38,9 @@ app.use(requestIdMiddleware);
 app.use(requestLogger);
 app.use(globalRateLimiter);
 
+// Audit log — records every successful admin write (POST/PUT/PATCH/DELETE) to audit_logs
+app.use("/api/v1", auditLog);
+
 // Versioned routes — /api/v1/ prefix
 // This lets you ship breaking API changes as /api/v2/ without breaking existing clients
 app.use("/api/v1/auth", authRoutes);
@@ -45,6 +50,7 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/checkout", checkoutRouter);
+app.use("/api/v1/totp", totpRoutes);
 
 // Health check — no rate limit, no auth (used by Docker healthcheck + load balancers)
 app.use(healthRoutes);

@@ -7,6 +7,7 @@ module.exports = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
     "^ioredis$": "<rootDir>/__mocks__/ioredis.js",
+    "^uuid$": "<rootDir>/__mocks__/uuid.js",
   },
   setupFiles: ["<rootDir>/tests/setup.ts"],
   transform: {

@@ -63,4 +63,20 @@ export class UserService {
   async findValidResetToken(token: string, now: Date): Promise<User | null> {
     return this.repo.findValidResetToken(token, now);
   }
+
+  findByIdRaw(id: number): Promise<User | null> {
+    return this.repo.findByIdRaw(id);
+  }
+
+  async updateTotpSecret(userId: number, secret: string | null): Promise<void> {
+    return this.repo.updateTotpSecret(userId, secret);
+  }
+
+  async enableMfa(userId: number): Promise<void> {
+    return this.repo.enableMfa(userId);
+  }
+
+  async disableMfa(userId: number): Promise<void> {
+    return this.repo.disableMfa(userId);
+  }
 }

@@ -31,9 +31,9 @@ describe("auth.redis", () => {
       await setRefreshToken(1, "session-abc", "jwt-token");
 
       expect(mockSet).toHaveBeenCalledWith(
-        "refresh_token:1:session-abc",
+        "admin:session:1:session-abc",
         "jwt-token",
-        604800 // days(7) = 7 * 24 * 60 * 60
+        3600 // 1 hour admin session
       );
     });
   });
@@ -42,7 +42,7 @@ describe("auth.redis", () => {
     it("should retrieve a refresh token by userId and sessionId", async () => {
       const result = await getRefreshToken(1, "session-abc");
 
-      expect(mockGet).toHaveBeenCalledWith("refresh_token:1:session-abc");
+      expect(mockGet).toHaveBeenCalledWith("admin:session:1:session-abc");
       expect(result).toBe("stored-token");
     });
   });
@@ -51,23 +51,23 @@ describe("auth.redis", () => {
     it("should delete a refresh token by userId and sessionId", async () => {
       await deleteRefreshToken(1, "session-abc");
 
-      expect(mockDelete).toHaveBeenCalledWith("refresh_token:1:session-abc");
+      expect(mockDelete).toHaveBeenCalledWith("admin:session:1:session-abc");
     });
   });
 
   describe("logoutAll", () => {
     it("should delete all tokens for a user when keys exist", async () => {
       mockGetKeys.mockResolvedValueOnce([
-        "refresh_token:1:s1",
-        "refresh_token:1:s2",
+        "admin:session:1:s1",
+        "admin:session:1:s2",
       ]);
 
       await logoutAll(1);
 
-      expect(mockGetKeys).toHaveBeenCalledWith("refresh_token:1:*");
+      expect(mockGetKeys).toHaveBeenCalledWith("admin:session:1:*");
       expect(mockDeleteAll).toHaveBeenCalledWith([
-        "refresh_token:1:s1",
-        "refresh_token:1:s2",
+        "admin:session:1:s1",
+        "admin:session:1:s2",
       ]);
     });
 
@@ -76,7 +76,7 @@ describe("auth.redis", () => {
 
       await logoutAll(1);
 
-      expect(mockGetKeys).toHaveBeenCalledWith("refresh_token:1:*");
+      expect(mockGetKeys).toHaveBeenCalledWith("admin:session:1:*");
       expect(mockDeleteAll).not.toHaveBeenCalled();
     });
   });

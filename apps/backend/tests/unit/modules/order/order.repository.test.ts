@@ -8,6 +8,8 @@ jest.mock("@/modules/order/order.model");
 const mockOrder = {
   id: 1,
   userId: 1,
+  customerId: null,
+  stripePaymentIntentId: null,
   status: "pending" as OrderStatus,
   paymentStatus: "pending" as PaymentStatus,
   totalAmount: 59.98,
@@ -19,6 +21,8 @@ const mockOrder = {
   toJSON: jest.fn().mockReturnValue({
     id: 1,
     userId: 1,
+    customerId: null,
+    stripePaymentIntentId: null,
     status: "pending",
     paymentStatus: "pending",
     totalAmount: 59.98,

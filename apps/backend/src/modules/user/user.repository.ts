@@ -49,4 +49,23 @@ export class UserRepository {
       },
     });
   }
+
+  findByIdRaw(id: number): Promise<User | null> {
+    return User.findByPk(id);
+  }
+
+  async updateTotpSecret(userId: number, secret: string | null): Promise<void> {
+    await User.update({ totpSecret: secret }, { where: { id: userId } });
+  }
+
+  async enableMfa(userId: number): Promise<void> {
+    await User.update({ isMfaEnabled: true }, { where: { id: userId } });
+  }
+
+  async disableMfa(userId: number): Promise<void> {
+    await User.update(
+      { isMfaEnabled: false, totpSecret: null },
+      { where: { id: userId } }
+    );
+  }
 }

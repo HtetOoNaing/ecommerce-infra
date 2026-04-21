@@ -21,6 +21,8 @@ export class OrderService {
     return {
       id: order.id,
       userId: order.userId,
+      customerId: order.customerId,
+      stripePaymentIntentId: order.stripePaymentIntentId,
       status: order.status,
       paymentStatus: order.paymentStatus,
       totalAmount: order.totalAmount,
@@ -42,6 +44,9 @@ export class OrderService {
 
   async create(data: CreateOrderDto): Promise<OrderResponseDto> {
     // Verify user exists
+    if (data.userId == null) {
+      throw AppError.badRequest("userId is required");
+    }
     const user = await this.userRepo.findById(data.userId);
     if (!user) {
       throw AppError.notFound(`User with id ${data.userId} not found`);
