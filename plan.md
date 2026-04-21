@@ -145,15 +145,15 @@ ecommerce-infra/
 - [x] Update `/checkout` page to use Stripe Elements + PaymentElement
 - [x] Create `/orders/confirmation` page — Stripe redirect handler
 
-### Phase 5 — Admin Security Hardening
+### Phase 5 — Admin Security Hardening ✅ COMPLETE
 > Goal: production-grade admin access control
 
-- [ ] TOTP MFA for admin users (`speakeasy` + QR code setup)
-- [ ] Audit log table — log every admin write action (who, what, when, ip, before/after)
-- [ ] Nginx IP allowlist for `app.infra-pro.com`
-- [ ] Separate Redis namespaces: `admin:session:*` vs `customer:session:*`
-- [ ] Stricter rate limits on admin auth (3 attempts / 15min)
-- [ ] Admin session expiry shorter (15m access / 1h refresh)
+- [x] TOTP MFA for admin users (`otplib` + `qrcode` for QR code setup)
+- [x] Audit log table — log every admin write action (who, what, when, ip, before/after)
+- [x] Nginx IP allowlist for `app.infra-pro.com`
+- [x] Separate Redis namespaces: `admin:session:*` vs `customer:session:*`
+- [x] Stricter rate limits on admin auth (3 attempts / 15min)
+- [x] Admin session expiry shorter (15m access / 1h refresh)
 
 ### Phase 6 — Storefront Performance & SEO
 - [ ] ISR on product pages (`revalidate: 60`)
