@@ -36,7 +36,8 @@ export function clearCustomerTokens(): void {
 }
 
 const apiClient = createApiClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL + "/api/v1",
+  // Use INTERNAL_API_URL for server-side (Docker network), NEXT_PUBLIC_API_URL for client-side
+  baseURL: (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL) + "/api/v1",
   getAccessToken: getCustomerAccessToken,
   setAccessToken: setCustomerAccessToken,
   getRefreshToken: getCustomerRefreshToken,
