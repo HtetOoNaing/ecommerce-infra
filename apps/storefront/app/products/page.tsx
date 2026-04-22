@@ -26,8 +26,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       : await getProducts(page, limit);
     products = response.data;
     totalPages = Math.ceil(response.total / limit);
-  } catch {
-    // Handle error silently - products will be empty
+  } catch (err) {
+    // Log error for debugging
+    console.error("Failed to fetch products:", err);
   }
 
   return (
